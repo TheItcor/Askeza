@@ -1,6 +1,6 @@
 /* ==== Virtual Stack Machine Interpretator (Askeza) ====
  *
- * Version: 1.0.0 "Socrates"
+ * Version: 1.1.0 "Socrates"
  * Started: 16.12.2025
  * Github (documentation and etc): https://github.com/TheItcor/Askeza
  *
@@ -10,13 +10,12 @@
  * */
 
 /* To Do
- * [x] reading file line by line, counter the number of line.
- * [x] split file by tokens (tk).
- * [x] simple interpretation.
- * [x] stack
- * [x] registers
- * [x] errors message.
- * 
+ * [ ] True interpretation of main instructions:
+ *     push, pop, swap, copy, print, input(?)
+ * [ ] Interpretation of math instructions:
+ *     add, mul, sub, div, idiv
+ * [ ] Split the error header.
+ * [ ] Add optional debugger
  * */
 
 #include <stdio.h>
@@ -316,7 +315,7 @@ int main(int argc, char *argv[]) {
         
         
         default:
-            fprintf(stderr, "[Syntax error]: unknown instruction at line %d\n", line_number);
+            fprintf(stderr, "[Syntax error]: unknown instruction: \n%s \n   ...at the line. %d\n", line, line_number);
             break;
         }
         
