@@ -108,7 +108,9 @@ OP_CODE get_op_code(char *operation){
 }
 
 
-void push() {}
+void push(char *from, char *to) {
+    
+}
 
 void pop() {}
 
@@ -150,7 +152,7 @@ void check_file_path(char *file_path)
     }
     else
     {
-        fprintf(stderr, "[Fatal Error]: This file does not exist. Wrong path?.\n");
+        fprintf(stderr, "[Read Error]: This file does not exist. Wrong path?.\n");
         exit(1);
     }
 }
@@ -163,7 +165,7 @@ void check_file_extension(char *file_path)
     }
     else
     {
-        fprintf(stderr, "[Fatal Error]: This file does have right extension .ask!\n");
+        fprintf(stderr, "[Read Error]: This file does have right extension .ask!\n");
         exit(1);
     }
 }
@@ -194,7 +196,7 @@ int main(int argc, char *argv[]) {
     // Analise all arguments. Throw errors.
     if (argc < 2)
     {
-        fprintf(stderr, "[Fatal error]: Arguments needed!\n");
+        fprintf(stderr, "[Read error]: Arguments needed!\n");
         exit(1);
     }
 
@@ -315,14 +317,14 @@ int main(int argc, char *argv[]) {
         
         
         default:
-            fprintf(stderr, "[Syntax error]: unknown instruction: \n%s \n   ...at the line. %d\n", line, line_number);
+            fprintf(stderr, "[Syntax error]: unknown instruction: \n%s \n   ...at the line %d.\n", line, line_number);
             break;
         }
         
         
     }
 
-    if (flag_main == 0) fprintf(stderr, "[Error]: label main not found.");
+    if (flag_main == 0) fprintf(stderr, "[Fatal Error]: label main not found.");
 
     return 0;
 }
