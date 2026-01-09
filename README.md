@@ -80,7 +80,7 @@ print: 40
 successful end.
 ```
 
-## Ошибки интерпретатора
+## interpreter's errors
 
 During the interpreter's operation, an error may be detected:
 
