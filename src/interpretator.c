@@ -18,16 +18,17 @@
  * [ ] Add optional debugger
  * */
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 
 //#include "throwErrors.h"?
 //#include "stackRegisters.h"?
 
 int STACK_SIZE = 1024;
 int REGISTER_NUMBER = 4;
+int stack_pointer = -1;             // if -1, then stack is empty
 
 // Data type
 typedef enum {
@@ -37,7 +38,7 @@ typedef enum {
     TYPE_VOID   // = int 0
 } DataType;
 
-// Value of Stack/Register 
+// Value of Stack/Register
 typedef union {
     char c;
     int i;
@@ -58,7 +59,7 @@ void init(Element *regstack, int size) {
     {
         regstack[i].type = TYPE_VOID;
         regstack[i].value.i = 0;
-    }    
+    }
 }
 
 
@@ -103,14 +104,22 @@ OP_CODE get_op_code(char *operation){
     if (strcmp(operation, "end") == 0) return OP_END;
     if (strcmp(operation, "if") == 0) return OP_IF;
     if (strchr(operation, ':') != NULL) return OP_LABEL;
-    
+
     return OP_UNKNOW;
 }
 
 
-void push(char *from, char *to) {
-    
+void push(Element *to, Element *from) {
+    /* Pushing Element into Stack/Register
+    * example:
+    * push <dest> <src>
+    */
+    to->value = from->value;
+    to->type = from->type;
+
+    from->type = TYPE_VOID;
 }
+
 
 void pop() {}
 
@@ -170,6 +179,13 @@ void check_file_extension(char *file_path)
     }
 }
 
+void is_overflow() {
+    if (stack_pointer+1 >= STACK_SIZE) {
+        fprintf(stderr, "[Fatal Error]: stack overflow\n");
+        exit(1);
+    }
+}
+
 // Funcs for parse
 
 void strip_comment(char *line) {
@@ -177,8 +193,26 @@ void strip_comment(char *line) {
     if (comment) *comment = '\0';
 }
 
+int which_register(char *last_char){
+    if (strcmp(last_char, "r")) {
+        return -1; //return_register
+    } else {
+        return atoi(last_char); // register №0...1....2...3...
+    }
+}
 
+int parse_number(char *str) {    
+    // Skip letters
+    while (*str && isalpha(*str)) {
+        str++;
+    }
 
+    return atoi(str);
+}
+
+int is_register(char *str) {
+
+}
 
 int main(int argc, char *argv[]) {
     /* Arguments:
@@ -187,11 +221,11 @@ int main(int argc, char *argv[]) {
      * argv[?] - stack size
      * argv[?] - amount of registers
      * argv[argc-1] (last) - file name
-     * 
+     *
      * example:
-     * ask dbg s512 r10 file.ask 
+     * ask dbg s512 r10 file.ask
      */
-    
+
 
     // Analise all arguments. Throw errors.
     if (argc < 2)
@@ -202,21 +236,21 @@ int main(int argc, char *argv[]) {
 
     check_file_path(argv[argc-1]);      // is real file or no?
     check_file_extension(argv[argc-1]); // is .ask file or no?
-    
+
     // Initialization of Stack & Registers
-    
-    int stack_pointer = -1;             // if -1, then stack is empty 
+
     Element stack[STACK_SIZE];
     Element registers[REGISTER_NUMBER]; // [0] = r0, [1] = r1, ...
     Element return_register;            // rr
-    
+    Element temp_value;                 // for pushing separate char/int/float to stack/register: push s 5
+
     init(stack, STACK_SIZE);
     init(registers, REGISTER_NUMBER);
 
     printf("[Debugger]: Stack size: %d\n", STACK_SIZE);
     printf("[Debugger]: Amount of registers: %d\n", REGISTER_NUMBER);
-    
-    
+
+
     // Reading .ask file
     FILE *file = fopen(argv[argc-1], "r");
 
@@ -228,103 +262,140 @@ int main(int argc, char *argv[]) {
     while (fgets(line, sizeof(line), file) != NULL)
     {
         line_number++;
-        
+
         // Delete comments
         strip_comment(line);
-    
+
         // Finds the "main" label, if it's not there, then just skips everything else.
         if (!flag_main && !strstr(line, "main:")) continue;
         if (!flag_main) flag_main = 1;
-        
+
         line[strcspn(line, "\n")] = '\0'; // no "\n" in my lines!
-        
+
         // Tokenization:
         tk = strtok(line, " ");
         // If line is empty just skip it. Maybe TODO: skip empty (even with spaces) line before tokenization
         if (tk == NULL) continue;
-        
+
         OP_CODE operation = get_op_code(&tk[0]);
-        
+
         switch (operation)
         {
         case OP_PUSH:
             printf("[Debugger]: %d. PUSH\n", line_number);
-            break;
+
+            Element *first_arg;  
+            Element *second_arg;
+
+            // find first_arg (destination) always can be register or stack
+            if (strcmp(&tk[1], "s") == 0) {
+                is_overflow();
+                stack_pointer++;
+                first_arg = &stack[stack_pointer];
+            } else if (strpbrk(&tk[1], "0123456789") != NULL) { // if any numbres in first argument = register
+                int reg_number = parse_number(&tk[1]);
+
+                first_arg = &registers[reg_number];
+            } else {
+                first_arg = &return_register;
+            }
+
+            // find second_arg (source) can be register, stack or int/char/float
+            if (strcmp(&tk[2], "s") == 0) {
+                stack_pointer--;
+                second_arg = &stack[stack_pointer];
+            } else if (strchr(&tk[2], 'r')) {
+                if (strpbrk(&tk[1], "0123456789") != NULL) { // if any numbres in first argument = register
+                int reg_number = parse_number(&tk[1]);
+
+                first_arg = &registers[reg_number];
+                } else {
+                first_arg = &return_register;
+                }   
+            } else {
+                
+            }
+
+            push(first_arg, &second_arg);
             
+            break;
+
         case OP_POP:
             printf("[Debugger]: %d. POP\n", line_number);
             break;
-            
+
         case OP_SWAP:
             printf("[Debugger]: %d. SWAP\n", line_number);
             break;
-            
+
         case OP_COPY:
             printf("[Debugger]: %d. COPY\n", line_number);
             break;
-            
+
         case OP_PRINT:
             printf("[Debugger]: %d. PRINT\n", line_number);
             break;
-            
+
         case OP_INPUT:
             printf("[Debugger]: %d. INPUT\n", line_number);
             break;
-            
+
         case OP_GETLINES:
             printf("[Debugger]: %d. GETLINES\n", line_number);
             break;
-            
+
         case OP_ADD:
             printf("[Debugger]: %d. ADD\n", line_number);
             break;
-            
+
         case OP_MUL:
             printf("[Debugger]: %d. MUL\n", line_number);
             break;
-            
+
         case OP_SUB:
             printf("[Debugger]: %d. SUB\n", line_number);
             break;
-            
+
         case OP_DIV:
             printf("[Debugger]: %d. DIV\n", line_number);
             break;
-            
+
         case OP_IDIV:
             printf("[Debugger]: %d. IDIV\n", line_number);
             break;
-            
+
         case OP_JMP:
             printf("[Debugger]: %d. JMP\n", line_number);
             break;
-            
+
         case OP_IF:
             printf("[Debugger]: %d. IF\n", line_number);
             break;
-            
+
         case OP_RET:
             printf("[Debugger]: %d. RET\n", line_number);
             break;
-            
+
         case OP_END:
             printf("[Debugger]: %d. END\n", line_number);
             return 0;
-            
+
         case OP_LABEL:
             printf("[Debugger]: %d. MAIN!\n", line_number);
             break;
-        
-        
+
+
         default:
             fprintf(stderr, "[Syntax error]: unknown instruction: \n%s \n   ...at the line %d.\n", line, line_number);
             break;
         }
-        
-        
     }
 
     if (flag_main == 0) fprintf(stderr, "[Fatal Error]: label main not found.");
+
+    for (int i = 0; i < (int)(STACK_SIZE/10); i++) {
+        printf("%d", stack[i].value.i);
+    }
 
     return 0;
 }
