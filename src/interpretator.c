@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 //#include "throwErrors.h"?
 //#include "stackRegisters.h"?
@@ -29,6 +30,7 @@
 int STACK_SIZE = 1024;
 int REGISTER_NUMBER = 4;
 int stack_pointer = -1;             // if -1, then stack is empty
+int line_number = 0;                // for throwing errors
 
 // Data type
 typedef enum {
@@ -201,7 +203,7 @@ int which_register(char *last_char){
     }
 }
 
-int parse_number(char *str) {    
+int parse_number(char *str) {
     // Skip letters
     while (*str && isalpha(*str)) {
         str++;
@@ -210,8 +212,75 @@ int parse_number(char *str) {
     return atoi(str);
 }
 
-int is_register(char *str) {
+Element* process_token(char* tk, Element* stack, Element* r_register, Element* registers, Element* temp_value) {
+    /* Parses the string (argument) and then returns the address:
+    * "s"   -> stack address
+    * "rr"  -> return_register addres
+    * "r0"  -> registers[0] adress
+    * ""a"" -> temp_value (a)(char) address
+    * "1"   -> temp_value (1)(int) address
+    * "1.0" -> temp_value (1.0)(float) address
+    */
 
+    // Check for (stack)
+    if (strcmp(tk, "s") == 0) {
+        return stack;
+    }
+    // Check for "rr" (return register)
+    else if (strcmp(tk, "rr") == 0) {
+        return r_register;
+    }
+    // Check for registers (r0, r1, r2, ...)
+    else if (tk[0] == 'r' && strlen(tk) > 1) {
+        // Extract and validate register number
+        char *num_part = tk + 1;  // Skip 'r' character
+        while (*num_part) {
+            if (!isdigit(*num_part)) break;  // Stop if non-digit found
+            num_part++;
+        }
+
+        if (*num_part == '\0') {
+            // Valid register number - calculate index
+            int reg_index = atoi(tk + 1);
+            return &registers[reg_index];  // Return address of specific register
+        } else {
+            fprintf(stderr, "[Syntax Error]: Non-existent register on line %d .\n", line_number);
+            exit(1);
+        }
+    }
+    // Check for single character tokens
+    else if (strlen(tk) == 1) {
+        printf("%s - single character\n", tk);
+        // Store character in temp_value if needed
+        return temp_value;
+    }
+    // Check for numbers (integer or floating point)
+    else {
+        char *endptr;
+        double d = strtod(tk, &endptr);
+
+        if (*endptr == '\0') {
+            // Valid number detected
+            if (d == (int)d) {
+                printf("integer number\n");
+                // Store integer in temp_value
+            } else {
+                printf("floating point number\n");
+                // Store float in temp_value
+            }
+            return temp_value;
+        }
+        // Check for character literal in double quotes
+        else if (tk[0] == '"' && tk[strlen(tk)-1] == '"' && strlen(tk) == 3) {
+            // Character literal like "a" (quotes included in token)
+            printf("character literal: %c\n", tk[1]);
+            return temp_value;
+        }
+        else {
+            printf("%s - string literal\n", tk);
+            return NULL;  // String literal or unrecognized format
+        }
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -255,13 +324,16 @@ int main(int argc, char *argv[]) {
     FILE *file = fopen(argv[argc-1], "r");
 
     char line[256];      // one line of file.ask
+    char *tokens[8];     // array for tokens
     char *tk;            // token
-    int line_number = 0; // line numbers for error throws
+    int tk_count;    // tokens count
+    line_number = 0;     // line numbers for error throws
     short flag_main = 0; // is "main" started?
 
     while (fgets(line, sizeof(line), file) != NULL)
     {
         line_number++;
+        tk_count = 0;
 
         // Delete comments
         strip_comment(line);
@@ -277,47 +349,31 @@ int main(int argc, char *argv[]) {
         // If line is empty just skip it. Maybe TODO: skip empty (even with spaces) line before tokenization
         if (tk == NULL) continue;
 
-        OP_CODE operation = get_op_code(&tk[0]);
+        tokens[tk_count++] = tk;  // first token
+
+        while ((tk = strtok(NULL, " ")) != NULL && tk_count < 8) {
+            tokens[tk_count++] = tk;
+        }
+
+        // Tokens print test
+        //for (int i = 0; i < tk_count; i++) {
+        //    printf("token %d: %s\n", i, tokens[i]);
+        //}
+
+        OP_CODE operation = get_op_code(tokens[0]);
 
         switch (operation)
         {
         case OP_PUSH:
             printf("[Debugger]: %d. PUSH\n", line_number);
 
-            Element *first_arg;  
-            Element *second_arg;
 
-            // find first_arg (destination) always can be register or stack
-            if (strcmp(&tk[1], "s") == 0) {
-                is_overflow();
-                stack_pointer++;
-                first_arg = &stack[stack_pointer];
-            } else if (strpbrk(&tk[1], "0123456789") != NULL) { // if any numbres in first argument = register
-                int reg_number = parse_number(&tk[1]);
+            // Reading arguments & get address of them
+            //Element *first_arg = process_token(&tk[1], stack, &return_register, registers, &temp_value);
+            //Element *second_arg = process_token(&tk[2], stack, &return_register, registers, &temp_value);
 
-                first_arg = &registers[reg_number];
-            } else {
-                first_arg = &return_register;
-            }
+            //push(first_arg, second_arg);
 
-            // find second_arg (source) can be register, stack or int/char/float
-            if (strcmp(&tk[2], "s") == 0) {
-                stack_pointer--;
-                second_arg = &stack[stack_pointer];
-            } else if (strchr(&tk[2], 'r')) {
-                if (strpbrk(&tk[1], "0123456789") != NULL) { // if any numbres in first argument = register
-                int reg_number = parse_number(&tk[1]);
-
-                first_arg = &registers[reg_number];
-                } else {
-                first_arg = &return_register;
-                }   
-            } else {
-                
-            }
-
-            push(first_arg, &second_arg);
-            
             break;
 
         case OP_POP:
