@@ -127,7 +127,12 @@ void push(Element *to, Element *from) {
 }
 
 
-void pop() {}
+void pop(Element *stack) {
+    /* Delete element from Stack */
+    stack->type = TYPE_VOID;
+    stack->value.i = 0;
+    stack_pointer--;
+}
 
 void swap() {}
 
@@ -395,6 +400,7 @@ int main(int argc, char *argv[]) {
 
         case OP_POP:
             printf("[Debugger]: %d. POP\n", line_number);
+            pop(&stack[stack_pointer]);
             break;
 
         case OP_SWAP:
@@ -469,9 +475,9 @@ int main(int argc, char *argv[]) {
     if (flag_main == 0) fprintf(stderr, "[Fatal Error]: label main not found.");
 
     // Primitive debug
-    // for (int i = 0; i < (int)(STACK_SIZE/16); i++) {
-    //     printf("%d ", stack[i].value.i);
-    // }
+    for (int i = 0; i < (int)(STACK_SIZE/16); i++) {
+        printf("%d ", stack[i].value.i);
+    }
     //
     // printf("\n\n\n");
     // for (int i = 0; i < REGISTER_NUMBER; i++) {
