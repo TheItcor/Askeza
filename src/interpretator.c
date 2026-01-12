@@ -146,6 +146,11 @@ void swap(Element *first, Element *second) {
     second->value = temp.value;
 }
 
+void copy(Element *paste, Element *copy) {
+    paste->type = copy->type;
+    paste->value = copy->value;
+}
+
 void prints() {}
 
 void inputs() {}
@@ -414,8 +419,6 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_SWAP: {
-            printf("[Debugger]: %d. SWAP\n", line_number);
-
             Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
             Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
 
@@ -425,7 +428,17 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_COPY: {
-            printf("[Debugger]: %d. COPY\n", line_number);
+            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+
+            if (first_arg == stack) {
+                is_overflow();
+                stack_pointer++;
+                first_arg = &stack[stack_pointer];
+            }
+
+            copy(first_arg, second_arg);
+
             break;
         }
 
