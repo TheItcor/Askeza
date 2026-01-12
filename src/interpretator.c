@@ -376,10 +376,8 @@ int main(int argc, char *argv[]) {
 
         switch (operation)
         {
-        case OP_PUSH:
-            printf("[Debugger]: %d. PUSH\n", line_number);
-
-
+        case OP_PUSH: {
+            //printf("[Debugger]: %d. PUSH\n", line_number);
             // Reading arguments & get address of them
             Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
             Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
@@ -397,72 +395,88 @@ int main(int argc, char *argv[]) {
             push(first_arg, second_arg);
 
             break;
+        }
 
-        case OP_POP:
-            printf("[Debugger]: %d. POP\n", line_number);
+        case OP_POP: {
+            //printf("[Debugger]: %d. POP\n", line_number);
             pop(&stack[stack_pointer]);
             break;
+        }
 
-        case OP_SWAP:
+        case OP_SWAP: {
             printf("[Debugger]: %d. SWAP\n", line_number);
             break;
+        }
 
-        case OP_COPY:
+        case OP_COPY: {
             printf("[Debugger]: %d. COPY\n", line_number);
             break;
+        }
 
-        case OP_PRINT:
+        case OP_PRINT: {
             printf("[Debugger]: %d. PRINT\n", line_number);
             break;
+        }
 
-        case OP_INPUT:
+        case OP_INPUT: {
             printf("[Debugger]: %d. INPUT\n", line_number);
             break;
+        }
 
-        case OP_GETLINES:
+        case OP_GETLINES: {
             printf("[Debugger]: %d. GETLINES\n", line_number);
             break;
+        }
 
-        case OP_ADD:
+        case OP_ADD: {
             printf("[Debugger]: %d. ADD\n", line_number);
             break;
+        }
 
-        case OP_MUL:
+        case OP_MUL: {
             printf("[Debugger]: %d. MUL\n", line_number);
             break;
+        }
 
-        case OP_SUB:
+        case OP_SUB: {
             printf("[Debugger]: %d. SUB\n", line_number);
             break;
+        }
 
-        case OP_DIV:
+        case OP_DIV: {
             printf("[Debugger]: %d. DIV\n", line_number);
             break;
+        }
 
-        case OP_IDIV:
+        case OP_IDIV: {
             printf("[Debugger]: %d. IDIV\n", line_number);
             break;
+        }
 
-        case OP_JMP:
+        case OP_JMP: {
             printf("[Debugger]: %d. JMP\n", line_number);
             break;
+        }
 
-        case OP_IF:
+        case OP_IF: {
             printf("[Debugger]: %d. IF\n", line_number);
             break;
+        }
 
-        case OP_RET:
+        case OP_RET: {
             printf("[Debugger]: %d. RET\n", line_number);
             break;
+        }
 
-        case OP_END:
+        case OP_END: {
             printf("[Debugger]: %d. END\n", line_number);
             goto end;
+        }
 
-        case OP_LABEL:
+        case OP_LABEL: {
             printf("[Debugger]: %d. MAIN!\n", line_number);
             break;
-
+        }
 
         default:
             fprintf(stderr, "[Syntax error]: unknown instruction: \n%s \n   ...at the line %d.\n", line, line_number);
@@ -475,9 +489,9 @@ int main(int argc, char *argv[]) {
     if (flag_main == 0) fprintf(stderr, "[Fatal Error]: label main not found.");
 
     // Primitive debug
-    for (int i = 0; i < (int)(STACK_SIZE/16); i++) {
-        printf("%d ", stack[i].value.i);
-    }
+    // for (int i = 0; i < (int)(STACK_SIZE/16); i++) {
+    //     printf("%d ", stack[i].value.i);
+    // }
     //
     // printf("\n\n\n");
     // for (int i = 0; i < REGISTER_NUMBER; i++) {
