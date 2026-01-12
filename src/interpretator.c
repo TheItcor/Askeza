@@ -199,23 +199,6 @@ void strip_comment(char *line) {
     if (comment) *comment = '\0';
 }
 
-int which_register(char *last_char){
-    if (strcmp(last_char, "r")) {
-        return -1; //return_register
-    } else {
-        return atoi(last_char); // register №0...1....2...3...
-    }
-}
-
-int parse_number(char *str) {
-    // Skip letters
-    while (*str && isalpha(*str)) {
-        str++;
-    }
-
-    return atoi(str);
-}
-
 Element* process_token(char* tk, Element* stack, Element* r_register, Element* registers, Element* temp_value) {
     /* Parses the string (argument) and then returns the address:
     * "s"   -> stack address
@@ -397,6 +380,7 @@ int main(int argc, char *argv[]) {
             Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
 
             if (first_arg == stack) {
+                is_overflow();
                 stack_pointer++;
                 first_arg = &stack[stack_pointer];
             }
