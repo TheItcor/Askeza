@@ -1,6 +1,6 @@
 /* ==== Virtual Stack Machine Interpretator (Askeza) ====
  *
- * Version: 1.1.0 "Socrates"
+ * Version: 1.2.0 "Socrates"
  * Started: 16.12.2025
  * Github (documentation and etc): https://github.com/TheItcor/Askeza
  *
@@ -134,7 +134,17 @@ void pop(Element *stack) {
     stack_pointer--;
 }
 
-void swap() {}
+void swap(Element *first, Element *second) {
+    Element temp;
+    temp.type = first->type;
+    temp.value = first->value;
+
+    first->type = second->type;
+    first->value = second->value;
+
+    second->type = temp.type;
+    second->value = temp.value;
+}
 
 void prints() {}
 
@@ -405,6 +415,12 @@ int main(int argc, char *argv[]) {
 
         case OP_SWAP: {
             printf("[Debugger]: %d. SWAP\n", line_number);
+
+            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+
+            swap(first_arg, second_arg);
+
             break;
         }
 
