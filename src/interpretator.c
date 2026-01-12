@@ -115,11 +115,15 @@ void push(Element *to, Element *from) {
     /* Pushing Element into Stack/Register
     * example:
     * push <dest> <src>
+    *
+    * <dest> can be register/stack
+    * <src> can ve register/stack/char/int/float
     */
     to->value = from->value;
     to->type = from->type;
 
     from->type = TYPE_VOID;
+    from->value.i = 0;
 }
 
 
@@ -224,37 +228,51 @@ Element* process_token(char* tk, Element* stack, Element* r_register, Element* r
 
     // Check for (stack)
     if (strcmp(tk, "s") == 0) {
+        //printf("[process_token]: arg = stack\n");
         return stack;
     }
     // Check for "rr" (return register)
     else if (strcmp(tk, "rr") == 0) {
+        //printf("[process_token]: arg = rr\n");
         return r_register;
     }
     // Check for registers (r0, r1, r2, ...)
     else if (tk[0] == 'r' && strlen(tk) > 1) {
         // Extract and validate register number
-        char *num_part = tk + 1;  // Skip 'r' character
+        char *num_part = tk + 1;
         while (*num_part) {
-            if (!isdigit(*num_part)) break;  // Stop if non-digit found
+            if (!isdigit(*num_part)) break;
             num_part++;
         }
 
         if (*num_part == '\0') {
-            // Valid register number - calculate index
             int reg_index = atoi(tk + 1);
-            return &registers[reg_index];  // Return address of specific register
+            //printf("[process_token]: arg = r%d\n", reg_index);
+            return &registers[reg_index];
         } else {
-            fprintf(stderr, "[Syntax Error]: Non-existent register on line %d .\n", line_number);
+            fprintf(stderr, "[Syntax Error]: Non-existent register on line %d.\n", line_number);
             exit(1);
         }
     }
-    // Check for single character tokens
-    else if (strlen(tk) == 1) {
-        printf("%s - single character\n", tk);
-        // Store character in temp_value if needed
-        return temp_value;
+    // Check if token has double quotes (char literal)
+    else if (tk[0] == '"' && tk[strlen(tk)-1] == '"') {
+        // Remove the quotes
+        char content[strlen(tk)-1];
+        strncpy(content, tk + 1, strlen(tk) - 2);
+        content[strlen(tk)-2] = '\0';
+
+        // Check if it's a single character
+        if (strlen(content) == 1) {
+            //printf("[process_token]: arg = char '%c'\n", content[0]);
+            temp_value->type = TYPE_CHAR;
+            temp_value->value.c = content[0];
+            return temp_value;
+        } else {
+            //printf("[process_token]: arg = string (not a single char)\n");
+            return NULL;
+        }
     }
-    // Check for numbers (integer or floating point)
+    // Token doesn't have double quotes = check if it's a number
     else {
         char *endptr;
         double d = strtod(tk, &endptr);
@@ -262,23 +280,29 @@ Element* process_token(char* tk, Element* stack, Element* r_register, Element* r
         if (*endptr == '\0') {
             // Valid number detected
             if (d == (int)d) {
-                printf("integer number\n");
-                // Store integer in temp_value
+                // Int
+                //printf("[process_token]: arg = int %d\n", (int)d);
+                temp_value->type = TYPE_INT;
+                temp_value->value.i = (int)d;
             } else {
-                printf("floating point number\n");
-                // Store float in temp_value
+                // Float
+                //printf("[process_token]: arg = float %f\n", d);
+                temp_value->type = TYPE_FLOAT;
+                temp_value->value.f = (float)d;
             }
             return temp_value;
         }
-        // Check for character literal in double quotes
-        else if (tk[0] == '"' && tk[strlen(tk)-1] == '"' && strlen(tk) == 3) {
-            // Character literal like "a" (quotes included in token)
-            printf("character literal: %c\n", tk[1]);
-            return temp_value;
-        }
         else {
-            printf("%s - string literal\n", tk);
-            return NULL;  // String literal or unrecognized format
+            // Not a number and not in quotes - check if it's a single character
+            if (strlen(tk) == 1) {
+                //printf("[process_token]: arg = single char '%c'\n", tk[0]);
+                temp_value->type = TYPE_CHAR;
+                temp_value->value.c = tk[0];
+                return temp_value;
+            } else {
+                //fprintf(stderr, "[Fatal Error]: arg = unknown format '%s'\n", tk);
+                exit(1);
+            }
         }
     }
 }
@@ -326,7 +350,7 @@ int main(int argc, char *argv[]) {
     char line[256];      // one line of file.ask
     char *tokens[8];     // array for tokens
     char *tk;            // token
-    int tk_count;    // tokens count
+    int tk_count;        // tokens count
     line_number = 0;     // line numbers for error throws
     short flag_main = 0; // is "main" started?
 
@@ -369,10 +393,19 @@ int main(int argc, char *argv[]) {
 
 
             // Reading arguments & get address of them
-            //Element *first_arg = process_token(&tk[1], stack, &return_register, registers, &temp_value);
-            //Element *second_arg = process_token(&tk[2], stack, &return_register, registers, &temp_value);
+            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
 
-            //push(first_arg, second_arg);
+            if (first_arg == stack) {
+                stack_pointer++;
+                first_arg = &stack[stack_pointer];
+            }
+            if (second_arg == stack) {
+                second_arg = &stack[stack_pointer];
+                stack_pointer--;
+            }
+
+            push(first_arg, second_arg);
 
             break;
 
@@ -434,7 +467,7 @@ int main(int argc, char *argv[]) {
 
         case OP_END:
             printf("[Debugger]: %d. END\n", line_number);
-            return 0;
+            goto end;
 
         case OP_LABEL:
             printf("[Debugger]: %d. MAIN!\n", line_number);
@@ -447,11 +480,21 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    end:
+
     if (flag_main == 0) fprintf(stderr, "[Fatal Error]: label main not found.");
 
-    for (int i = 0; i < (int)(STACK_SIZE/10); i++) {
-        printf("%d", stack[i].value.i);
-    }
+    // Primitive debug
+    // for (int i = 0; i < (int)(STACK_SIZE/16); i++) {
+    //     printf("%d ", stack[i].value.i);
+    // }
+    //
+    // printf("\n\n\n");
+    // for (int i = 0; i < REGISTER_NUMBER; i++) {
+    //     printf("%d ", registers[i].value.i);
+    // }
+    // printf("\n\n\n");
+    // printf("[Stack pointer]: %d\n", stack_pointer);
 
     return 0;
 }
