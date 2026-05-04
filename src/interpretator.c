@@ -151,7 +151,17 @@ void copy(Element *paste, Element *copy) {
     paste->value = copy->value;
 }
 
-void prints() {}
+void prints(Element *element) {
+    if (element->type == TYPE_CHAR) {
+        printf("%c\n", element->value.c);
+    } else if (element->type == TYPE_FLOAT) {
+        printf("%f\n", element->value.f);
+    } else if (element->type == TYPE_INT) {
+        printf("%d\n", element->value.i);
+    } else {
+        return;
+    }
+}
 
 void inputs() {}
 
@@ -443,7 +453,9 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_PRINT: {
-            printf("[Debugger]: %d. PRINT\n", line_number);
+            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
+            prints(first_arg);
+
             break;
         }
 
