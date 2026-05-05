@@ -117,7 +117,7 @@ void push(Element *to, Element *from) {
     * push <dest> <src>
     *
     * <dest> can be register/stack
-    * <src> can ve register/stack/char/int/float
+    * <src> can be register/stack/char/int/float
     */
     to->value = from->value;
     to->type = from->type;
@@ -135,6 +135,7 @@ void pop(Element *stack) {
 }
 
 void swap(Element *first, Element *second) {
+    /* Swaps to elements */
     Element temp;
     temp.type = first->type;
     temp.value = first->value;
@@ -167,7 +168,23 @@ void inputs() {}
 
 void getline_() {}
 
-void add() {}
+void add(Element *first, Element *second) {
+    if (first->type == TYPE_CHAR || second->type == TYPE_CHAR) {
+        fprintf(stderr, "[Fatal Error]: attempt to add char!\n");
+        exit(1);
+    }
+
+    // if 1-st or 2-nd arg is float, then result is also float
+    if (first->type == TYPE_FLOAT || second->type == TYPE_FLOAT) {
+
+
+        // TODO
+
+
+    } else {
+        first->value.i = first->value.i + second->value.i;
+    }
+}
 
 void sub() {}
 
@@ -217,7 +234,14 @@ void check_file_extension(char *file_path)
 
 void is_overflow() {
     if (stack_pointer+1 >= STACK_SIZE) {
-        fprintf(stderr, "[Fatal Error]: stack overflow\n");
+        fprintf(stderr, "[Fatal Error]: stack overflow.\n");
+        exit(1);
+    }
+}
+
+void is_underflow() {
+    if (stack_pointer-1 <= -2) {
+        fprintf(stderr, "[Fatal Error]: stack underflow.\n");
         exit(1);
     }
 }
@@ -413,6 +437,7 @@ int main(int argc, char *argv[]) {
                 first_arg = &stack[stack_pointer];
             }
             if (second_arg == stack) {
+                is_underflow();
                 second_arg = &stack[stack_pointer];
                 stack_pointer--;
             }
@@ -470,7 +495,19 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_ADD: {
-            printf("[Debugger]: %d. ADD\n", line_number);
+            //printf("[Debugger]: %d. ADD\n", line_number);
+
+            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+
+            if (second_arg == stack) {
+                is_underflow();
+                second_arg = &stack[stack_pointer];
+                stack_pointer--;
+            }
+
+            add(first_arg, second_arg);
+
             break;
         }
 
