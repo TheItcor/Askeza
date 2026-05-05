@@ -90,12 +90,14 @@ successful end.
 
 | Ошибка                                                  | значение                              |
 | ------------------------------------------------------- | ------------------------------------- |
-| `[Fatal Error]: stack overflow`                         | Стек переполнен                       |
+| `[Fatal Error]: stack overflow`                         | Стек переполнен. Указатель стека провалился за верхние ограничения.|
 | `[Syntax Error]: unknown instruction /command/ at line /number/.`  | Синтаксическая ошибка + номер строки  |
 | `[Read Error]: This file does not exist. Wrong path?.` | Не существует файла для интерпретации |
 | `[Read Error]: This file does have right extension .ask!` | Файл с неправильным расширением.   |
-| `[Read Error]: Arguments needed!`                      | Не был передан хотя бы один аргумент  |
+| `[Read Error]: Arguments needed!`                      | Не был передан хотя бы один аргумент.  |
 | `[Fatal Error]: label main not found.`                 | Не была найден точка старта программы|
+| `[Fatal Error]: attempt to add char!`                  | Попытка сложить символы (буквы).       |
+| `[Fatal Error]: stack underflow`                       | Стек опустошен. Указатель стека провалился за нижние ограничения. |
 
 ---
 
