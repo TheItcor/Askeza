@@ -174,15 +174,28 @@ void add(Element *first, Element *second) {
         exit(1);
     }
 
-    // if 1-st or 2-nd arg is float, then result is also float
-    if (first->type == TYPE_FLOAT || second->type == TYPE_FLOAT) {
-
-
-        // TODO
-
-
-    } else {
-        first->value.i = first->value.i + second->value.i;
+    // this parts looks specific...
+    // both int
+    if (first->type == TYPE_INT && second->type == TYPE_INT) {
+        first->value.i += second->value.i;
+    }
+    // both float
+    else if (first->type == TYPE_FLOAT && second->type == TYPE_FLOAT) {
+        first->value.f += second->value.f;
+    }
+    // int + float -> float
+    else if (first->type == TYPE_INT && second->type == TYPE_FLOAT) {
+        float a = (float)first->value.i;
+        first->value.f = a + second->value.f;
+        first->type = TYPE_FLOAT;
+    }
+    // float + int -> float
+    else if (first->type == TYPE_FLOAT && second->type == TYPE_INT) {
+        first->value.f += (float)second->value.i;
+    }
+    else {
+        fprintf(stderr, "[Fatal Error]: invalid types for add\n");
+        exit(1);
     }
 }
 
