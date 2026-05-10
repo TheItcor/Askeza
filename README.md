@@ -100,6 +100,9 @@ During the interpreter's operation, an error may be detected:
 | `[Fatal Error]: Stack underflow`                                   | Stack underflow. The stack pointer fell below its lower limits. |
 | `[Fatal Error]: Invalid types for add`                             | Error related to types when adding. |
 | `[Syntax Error]: Non-existent register on line`                    | Attempt to use a non-existent register.  |
+| `[Fatal Error]: Invalid types for sub`                             | Error related to types when subtraction. |
+| `[Fatal Error]: Invalid types for mul`                             | Error related to types when multiplication. |
+| `[Fatal Error]: Invalid types for div`                             | Error related to types when division. |
 
 ---
 
