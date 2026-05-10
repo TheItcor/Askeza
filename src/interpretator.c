@@ -170,7 +170,7 @@ void getline_() {}
 
 void add(Element *first, Element *second) {
     if (first->type == TYPE_CHAR || second->type == TYPE_CHAR) {
-        fprintf(stderr, "[Fatal Error]: attempt to add char!\n");
+        fprintf(stderr, "[Fatal Error]: Attempt to add char!\n");
         exit(1);
     }
 
@@ -194,7 +194,7 @@ void add(Element *first, Element *second) {
         first->value.f += (float)second->value.i;
     }
     else {
-        fprintf(stderr, "[Fatal Error]: invalid types for add\n");
+        fprintf(stderr, "[Fatal Error]: Invalid types for add\n");
         exit(1);
     }
 }
@@ -247,14 +247,14 @@ void check_file_extension(char *file_path)
 
 void is_overflow() {
     if (stack_pointer+1 >= STACK_SIZE) {
-        fprintf(stderr, "[Fatal Error]: stack overflow.\n");
+        fprintf(stderr, "[Fatal Error]: Stack overflow.\n");
         exit(1);
     }
 }
 
 void is_underflow() {
     if (stack_pointer-1 <= -2) {
-        fprintf(stderr, "[Fatal Error]: stack underflow.\n");
+        fprintf(stderr, "[Fatal Error]: Stack underflow.\n");
         exit(1);
     }
 }
@@ -350,7 +350,7 @@ Element* process_token(char* tk, Element* stack, Element* r_register, Element* r
                 temp_value->value.c = tk[0];
                 return temp_value;
             } else {
-                //fprintf(stderr, "[Fatal Error]: arg = unknown format '%s'\n", tk);
+                //fprintf(stderr, "[Fatal Error]: Arg = unknown format '%s'\n", tk);
                 exit(1);
             }
         }
@@ -577,7 +577,7 @@ int main(int argc, char *argv[]) {
 
     end:
 
-    if (flag_main == 0) fprintf(stderr, "[Fatal Error]: label main not found.");
+    if (flag_main == 0) fprintf(stderr, "[Fatal Error]: Label main not found.");
 
     // Primitive debug
     // for (int i = 0; i < (int)(STACK_SIZE/16); i++) {

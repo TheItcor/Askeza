@@ -90,14 +90,16 @@ successful end.
 
 | Ошибка                                                  | значение                              |
 | ------------------------------------------------------- | ------------------------------------- |
-| `[Fatal Error]: stack overflow`                         | Стек переполнен. Указатель стека провалился за верхние ограничения.|
-| `[Syntax Error]: unknown instruction /command/ at line /number/.`  | Синтаксическая ошибка + номер строки  |
+| `[Fatal Error]: Stack overflow`                         | Стек переполнен. Указатель стека провалился за верхние ограничения.|
+| `[Syntax Error]: Unknown instruction /command/ at line /number/.`  | Синтаксическая ошибка + номер строки.  |
 | `[Read Error]: This file does not exist. Wrong path?.` | Не существует файла для интерпретации |
 | `[Read Error]: This file does have right extension .ask!` | Файл с неправильным расширением.   |
 | `[Read Error]: Arguments needed!`                      | Не был передан хотя бы один аргумент.  |
-| `[Fatal Error]: label main not found.`                 | Не была найден точка старта программы|
-| `[Fatal Error]: attempt to add char!`                  | Попытка сложить символы (буквы).       |
-| `[Fatal Error]: stack underflow`                       | Стек опустошен. Указатель стека провалился за нижние ограничения. |
+| `[Fatal Error]: Label main not found.`                 | Не была найден точка старта программы|
+| `[Fatal Error]: Attempt to add char!`                  | Попытка сложить символы (буквы).       |
+| `[Fatal Error]: Stack underflow`                       | Стек опустошен. Указатель стека провалился за нижние ограничения. |
+| `[Fatal Error]: Invalid types for add`                 | Ошибка при сложении, связанная с типами. |
+| `[Syntax Error]: Non-existent register on line`        | Попытка задействовать несуществующий регистр.  |
 
 ---
 

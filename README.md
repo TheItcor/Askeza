@@ -90,14 +90,16 @@ During the interpreter's operation, an error may be detected:
 
 | Error                                                              | Meaning                                       |
 | -------------------------------------------------------------------| ----------------------------------------------|
-| `[Fatal Error]: stack overflow`                                    | Stack overflow. The stack pointer has flown beyond its upper limits. |
-| `[Syntax Error]: unknown instruction /command/ at line /number/.`  | Syntax error + line number.                   |
+| `[Fatal Error]: Stack overflow`                                    | Stack overflow. The stack pointer has flown beyond its upper limits. |
+| `[Syntax Error]: Unknown instruction /command/ at line /number/.`  | Syntax error + line number.                   |
 | `[Read Error]: This file does not exist. Wrong path?.`             | The file for interpretation does not exist.   |
 | `[Read Error]: This file does have right extension .ask!`          | File has the wrong extension.                 |
 | `[Read Error]: Arguments needed!`                                  | No arguments were provided.                   |
-| `[Fatal Error]: label main not found.`                             | Program entry point (label 'main') not found. |
-| `[Fatal Error]: attempt to add char!`                              | Trying to sum characters.                     |
-| `[Fatal Error]: stack underflow`                                   | stack underflow. The stack pointer fell below its lower limits. |
+| `[Fatal Error]: Label main not found.`                             | Program entry point (label 'main') not found. |
+| `[Fatal Error]: Attempt to add char!`                              | Trying to sum characters.                     |
+| `[Fatal Error]: Stack underflow`                                   | Stack underflow. The stack pointer fell below its lower limits. |
+| `[Fatal Error]: Invalid types for add`                             | Error related to types when adding. |
+| `[Syntax Error]: Non-existent register on line`                    | Attempt to use a non-existent register.  |
 
 ---
 
