@@ -148,6 +148,7 @@ void swap(Element *first, Element *second) {
 }
 
 void copy(Element *paste, Element *copy) {
+    /* Copy element */
     paste->type = copy->type;
     paste->value = copy->value;
 }
@@ -169,6 +170,10 @@ void inputs() {}
 void getline_() {}
 
 void add(Element *first, Element *second) {
+    /* Addition operation
+     * first = first + second
+     */
+
     if (first->type == TYPE_CHAR || second->type == TYPE_CHAR) {
         fprintf(stderr, "[Fatal Error]: Attempt to add char!\n");
         exit(1);
@@ -200,6 +205,10 @@ void add(Element *first, Element *second) {
 }
 
 void sub(Element *first, Element *second) {
+    /* Subtraction operation
+     * first = first - second
+     */
+
     if (first->type == TYPE_CHAR || second->type == TYPE_CHAR) {
         fprintf(stderr, "[Fatal Error]: Attempt to sub char!\n");
         exit(1);
@@ -213,18 +222,52 @@ void sub(Element *first, Element *second) {
     else if (first->type == TYPE_FLOAT && second->type == TYPE_FLOAT) {
         first->value.f -= second->value.f;
     }
-    // int + float -> float
+    // int - float -> float
     else if (first->type == TYPE_INT && second->type == TYPE_FLOAT) {
         float a = (float)first->value.i;
         first->value.f = a - second->value.f;
         first->type = TYPE_FLOAT;
     }
-    // float + int -> float
+    // float - int -> float
     else if (first->type == TYPE_FLOAT && second->type == TYPE_INT) {
         first->value.f -= (float)second->value.i;
     }
     else {
         fprintf(stderr, "[Fatal Error]: Invalid types for sub\n");
+        exit(1);
+    }
+}
+
+void mul(Element *first, Element *second) {
+    /* Multiplication operation
+     * first = first * second
+     */
+
+    if (first->type == TYPE_CHAR || second->type == TYPE_CHAR) {
+        fprintf(stderr, "[Fatal Error]: Attempt to mul char!\n");
+        exit(1);
+    }
+
+    // both int
+    if (first->type == TYPE_INT && second->type == TYPE_INT) {
+        first->value.i *= second->value.i;
+    }
+    // both float
+    else if (first->type == TYPE_FLOAT && second->type == TYPE_FLOAT) {
+        first->value.f *= second->value.f;
+    }
+    // int * float -> float
+    else if (first->type == TYPE_INT && second->type == TYPE_FLOAT) {
+        float a = (float)first->value.i;
+        first->value.f = a * second->value.f;
+        first->type = TYPE_FLOAT;
+    }
+    // float * int -> float
+    else if (first->type == TYPE_FLOAT && second->type == TYPE_INT) {
+        first->value.f *= (float)second->value.i;
+    }
+    else {
+        fprintf(stderr, "[Fatal Error]: Invalid types for mul\n");
         exit(1);
     }
 }
@@ -547,7 +590,13 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_MUL: {
-            printf("[Debugger]: %d. MUL\n", line_number);
+            //printf("[Debugger]: %d. MUL\n", line_number);
+
+            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+
+            mul(first_arg, second_arg);
+
             break;
         }
 
