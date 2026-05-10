@@ -272,7 +272,46 @@ void mul(Element *first, Element *second) {
     }
 }
 
-void div_() {}
+void div_(Element *first, Element *second) {
+    /* Division operation
+     * first = first / second
+     */
+
+    if (first->type == TYPE_CHAR || second->type == TYPE_CHAR) {
+        fprintf(stderr, "[Fatal Error]: Attempt to div char!\n");
+        exit(1);
+    }
+
+    // Checking for division by zero for int and float (0.0f)
+    if ((second->type == TYPE_INT   && second->value.i == 0) ||
+        (second->type == TYPE_FLOAT && second->value.f == 0.0f)) {
+        fprintf(stderr, "[Fatal Error]: Division by zero!\n");
+        exit(1);
+    }
+
+    // both int
+    if (first->type == TYPE_INT && second->type == TYPE_INT) {
+        first->value.i /= second->value.i;
+    }
+    // both float
+    else if (first->type == TYPE_FLOAT && second->type == TYPE_FLOAT) {
+        first->value.f /= second->value.f;
+    }
+    // int / float -> float
+    else if (first->type == TYPE_INT && second->type == TYPE_FLOAT) {
+        float a = (float)first->value.i;
+        first->value.f = a / second->value.f;
+        first->type = TYPE_FLOAT;
+    }
+    // float / int -> float
+    else if (first->type == TYPE_FLOAT && second->type == TYPE_INT) {
+        first->value.f /= (float)second->value.i;
+    }
+    else {
+        fprintf(stderr, "[Fatal Error]: Invalid types for div\n");
+        exit(1);
+    }
+}
 
 void idiv() {}
 
@@ -612,7 +651,13 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_DIV: {
-            printf("[Debugger]: %d. DIV\n", line_number);
+            //printf("[Debugger]: %d. DIV\n", line_number);
+
+            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+
+            div_(first_arg, second_arg);
+
             break;
         }
 
