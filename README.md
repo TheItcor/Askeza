@@ -103,6 +103,7 @@ During the interpreter's operation, an error may be detected:
 | `[Fatal Error]: Invalid types for sub`                             | Error related to types when subtraction. |
 | `[Fatal Error]: Invalid types for mul`                             | Error related to types when multiplication. |
 | `[Fatal Error]: Invalid types for div`                             | Error related to types when division. |
+| `[Fatal Error]: Division by zero!`                                 | Attempt to divide by zero. |
 
 ---
 

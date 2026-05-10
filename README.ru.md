@@ -100,9 +100,10 @@ successful end.
 | `[Fatal Error]: Stack underflow`                       | Стек опустошен. Указатель стека провалился за нижние ограничения. |
 | `[Fatal Error]: Invalid types for add`                 | Ошибка при сложении, связанная с типами. |
 | `[Syntax Error]: Non-existent register on line`        | Попытка задействовать несуществующий регистр.  |
-| `[Fatal Error]: Invalid types for sub`                 |  Ошибка при вычитании, связанная с типами. |
-| `[Fatal Error]: Invalid types for mul`                 |  Ошибка при умножении, связанная с типами. |
-| `[Fatal Error]: Invalid types for div`                 |  Ошибка при делении, связанная с типами. |
+| `[Fatal Error]: Invalid types for sub`                 | Ошибка при вычитании, связанная с типами. |
+| `[Fatal Error]: Invalid types for mul`                 | Ошибка при умножении, связанная с типами. |
+| `[Fatal Error]: Invalid types for div`                 | Ошибка при делении, связанная с типами. |
+| `[Fatal Error]: Division by zero!`                     | Попытка деления на ноль. |
 
 ---
 
