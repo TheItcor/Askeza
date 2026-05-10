@@ -199,7 +199,35 @@ void add(Element *first, Element *second) {
     }
 }
 
-void sub() {}
+void sub(Element *first, Element *second) {
+    if (first->type == TYPE_CHAR || second->type == TYPE_CHAR) {
+        fprintf(stderr, "[Fatal Error]: Attempt to sub char!\n");
+        exit(1);
+    }
+
+    // both int
+    if (first->type == TYPE_INT && second->type == TYPE_INT) {
+        first->value.i -= second->value.i;
+    }
+    // both float
+    else if (first->type == TYPE_FLOAT && second->type == TYPE_FLOAT) {
+        first->value.f -= second->value.f;
+    }
+    // int + float -> float
+    else if (first->type == TYPE_INT && second->type == TYPE_FLOAT) {
+        float a = (float)first->value.i;
+        first->value.f = a - second->value.f;
+        first->type = TYPE_FLOAT;
+    }
+    // float + int -> float
+    else if (first->type == TYPE_FLOAT && second->type == TYPE_INT) {
+        first->value.f -= (float)second->value.i;
+    }
+    else {
+        fprintf(stderr, "[Fatal Error]: Invalid types for sub\n");
+        exit(1);
+    }
+}
 
 void div_() {}
 
@@ -513,12 +541,6 @@ int main(int argc, char *argv[]) {
             Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
             Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
 
-            if (second_arg == stack) {
-                is_underflow();
-                second_arg = &stack[stack_pointer];
-                stack_pointer--;
-            }
-
             add(first_arg, second_arg);
 
             break;
@@ -530,7 +552,13 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_SUB: {
-            printf("[Debugger]: %d. SUB\n", line_number);
+            //printf("[Debugger]: %d. SUB\n", line_number);
+
+            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+
+            sub(first_arg, second_arg);
+
             break;
         }
 
@@ -589,7 +617,7 @@ int main(int argc, char *argv[]) {
     //     printf("%d ", registers[i].value.i);
     // }
     // printf("\n\n\n");
-    // printf("[Stack pointer]: %d\n", stack_pointer);
+    printf("[Stack pointer]: %d\n", stack_pointer);
 
     return 0;
 }
