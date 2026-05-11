@@ -1,6 +1,6 @@
 /* ==== Virtual Stack Machine Interpretator (Askeza) ====
  *
- * Version: 1.2.0 "Socrates"
+ * Version: 1.3.0 "Socrates"
  * Started: 16.12.2025
  * Github (documentation and etc): https://github.com/TheItcor/Askeza
  *
@@ -10,9 +10,9 @@
  * */
 
 /* To Do
- * [ ] True interpretation of main instructions:
+ * [x] True interpretation of main instructions:
  *     push, pop, swap, copy, print, input(?)
- * [ ] Interpretation of math instructions:
+ * [x] Interpretation of math instructions:
  *     add, mul, sub, div, idiv
  * [ ] Split the error header.
  * [ ] Add optional debugger
@@ -88,6 +88,7 @@ typedef enum {
     OP_UNKNOW
 } OP_CODE;
 
+
 OP_CODE get_op_code(char *operation){
     if (strcmp(operation, "push") == 0) return OP_PUSH;
     if (strcmp(operation, "pop") == 0) return OP_POP;
@@ -134,6 +135,7 @@ void pop(Element *stack) {
     stack_pointer--;
 }
 
+
 void swap(Element *first, Element *second) {
     /* Swaps to elements */
     Element temp;
@@ -147,13 +149,19 @@ void swap(Element *first, Element *second) {
     second->value = temp.value;
 }
 
+
 void copy(Element *paste, Element *copy) {
     /* Copy element */
     paste->type = copy->type;
     paste->value = copy->value;
 }
 
+
 void prints(Element *element) {
+    /* Output element
+     * Only one element each command
+     */
+
     if (element->type == TYPE_CHAR) {
         printf("%c\n", element->value.c);
     } else if (element->type == TYPE_FLOAT) {
@@ -165,9 +173,57 @@ void prints(Element *element) {
     }
 }
 
-void inputs() {}
+
+void inputs(char type, Element *element) {
+    /* Input element
+     * Safe value in element from output
+     * example:
+     * input int r0
+     * input float r0
+     * input char r0
+     */
+
+    switch (type) {
+
+        // input int -> element
+        case 'i':
+            element->type = TYPE_INT;
+            if (scanf("%d", &element->value.i) != 1) {
+                fprintf(stderr, "[Fatal Error][%d]: Failed to read integer\n", line_number);
+                exit(1);
+            }
+
+            break;
+
+        // input float -> element
+        case 'f':
+            element->type = TYPE_FLOAT;
+            if (scanf("%f", &element->value.f) != 1) {
+                fprintf(stderr, "[Fatal Error][%d]: Failed to read float\n", line_number);
+                exit(1);
+            }
+
+            break;
+
+        // input char -> element
+        case 'c':
+            element->type = TYPE_CHAR;
+            if (scanf(" %c", &element->value.c) != 1) {
+                fprintf(stderr, "[Fatal Error][%d]: Failed to read char\n", line_number);
+                exit(1);
+            }
+
+            break;
+
+        default:
+            fprintf(stderr, "[Syntax Error][%d]: Unknow type on input", line_number);
+            exit(1);
+    }
+}
+
 
 void getline_() {}
+
 
 void add(Element *first, Element *second) {
     /* Addition operation
@@ -204,6 +260,7 @@ void add(Element *first, Element *second) {
     }
 }
 
+
 void sub(Element *first, Element *second) {
     /* Subtraction operation
      * first = first - second
@@ -238,6 +295,7 @@ void sub(Element *first, Element *second) {
     }
 }
 
+
 void mul(Element *first, Element *second) {
     /* Multiplication operation
      * first = first * second
@@ -271,6 +329,7 @@ void mul(Element *first, Element *second) {
         exit(1);
     }
 }
+
 
 void div_(Element *first, Element *second) {
     /* Division operation
@@ -313,13 +372,18 @@ void div_(Element *first, Element *second) {
     }
 }
 
+
 void idiv() {}
+
 
 void jmp() {}
 
+
 void if_() {}
 
+
 void ret() {}
+
 
 void end() {}
 
@@ -332,7 +396,7 @@ void check_file_path(char *file_path)
     FILE *file = fopen(file_path, "r");
     if (file != NULL)
     {
-        printf("[Debugger]: check_file_path - ok.\n");
+        //printf("[Debugger]: check_file_path - ok.\n");
         fclose(file);
     }
     else
@@ -346,7 +410,7 @@ void check_file_extension(char *file_path)
 {
     if (strrchr(file_path, '.') != NULL && strcmp(strrchr(file_path, '.'), ".ask") == 0)
     {
-        printf("[Debugger]: check_file_extension - ok.\n");
+        //printf("[Debugger]: check_file_extension - ok.\n");
     }
     else
     {
@@ -500,8 +564,8 @@ int main(int argc, char *argv[]) {
     init(stack, STACK_SIZE);
     init(registers, REGISTER_NUMBER);
 
-    printf("[Debugger]: Stack size: %d\n", STACK_SIZE);
-    printf("[Debugger]: Amount of registers: %d\n", REGISTER_NUMBER);
+    //printf("[Debugger]: Stack size: %d\n", STACK_SIZE);
+    //printf("[Debugger]: Amount of registers: %d\n", REGISTER_NUMBER);
 
 
     // Reading .ask file
@@ -516,6 +580,7 @@ int main(int argc, char *argv[]) {
 
     while (fgets(line, sizeof(line), file) != NULL)
     {
+        //printf("[Stack pointer][%d]: %d\n", line_number, stack_pointer);
         line_number++;
         tk_count = 0;
 
@@ -702,16 +767,31 @@ int main(int argc, char *argv[]) {
     if (flag_main == 0) fprintf(stderr, "[Fatal Error]: Label main not found.");
 
     // Primitive debug
+    // const char* type_name(DataType t) {
+    //     switch (t) {
+    //         case TYPE_CHAR:  return "TYPE_CHAR";
+    //         case TYPE_INT:   return "TYPE_INT";
+    //         case TYPE_FLOAT: return "TYPE_FLOAT";
+    //         case TYPE_VOID:  return "TYPE_VOID";
+    //         default:         return "UNKNOWN";
+    //     }
+    // }
     // for (int i = 0; i < (int)(STACK_SIZE/16); i++) {
     //     printf("%d ", stack[i].value.i);
     // }
-    //
+    // printf("\n");
+    // for (int i = 0; i < (int)(STACK_SIZE/16); i++) {
+    //     printf("%s ", type_name(stack[i].type));
+    // }
     // printf("\n\n\n");
     // for (int i = 0; i < REGISTER_NUMBER; i++) {
     //     printf("%d ", registers[i].value.i);
     // }
+    // for (int i = 0; i < (int)(STACK_SIZE/16); i++) {
+    //     printf("%s ", type_name(registers[i].type));
+    // }
     // printf("\n\n\n");
-    printf("[Stack pointer]: %d\n", stack_pointer);
+    //printf("[Stack pointer]: %d\n", stack_pointer);
 
     return 0;
 }
