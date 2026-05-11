@@ -678,7 +678,19 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_INPUT: {
-            printf("[Debugger]: %d. INPUT\n", line_number);
+            //printf("[Debugger]: %d. INPUT\n", line_number);
+
+            //Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+
+            if (second_arg == stack) {
+                is_overflow();
+                stack_pointer++;
+                second_arg = &stack[stack_pointer];
+            }
+
+            //send only the first char of the type: float -> f, int -> i, char -> c
+            inputs(tokens[1][0], second_arg);
             break;
         }
 
