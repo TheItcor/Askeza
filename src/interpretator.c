@@ -231,7 +231,7 @@ void add(Element *first, Element *second) {
      */
 
     if (first->type == TYPE_CHAR || second->type == TYPE_CHAR) {
-        fprintf(stderr, "[Fatal Error]: Attempt to add char!\n");
+        fprintf(stderr, "[Fatal Error][%d]: Attempt to add char!\n", line_number);
         exit(1);
     }
 
@@ -255,7 +255,7 @@ void add(Element *first, Element *second) {
         first->value.f += (float)second->value.i;
     }
     else {
-        fprintf(stderr, "[Fatal Error]: Invalid types for add\n");
+        fprintf(stderr, "[Fatal Error[%d]: Invalid types for add\n", line_number);
         exit(1);
     }
 }
@@ -267,7 +267,7 @@ void sub(Element *first, Element *second) {
      */
 
     if (first->type == TYPE_CHAR || second->type == TYPE_CHAR) {
-        fprintf(stderr, "[Fatal Error]: Attempt to sub char!\n");
+        fprintf(stderr, "[Fatal Error][%d]: Attempt to sub char!\n", line_number);
         exit(1);
     }
 
@@ -290,7 +290,7 @@ void sub(Element *first, Element *second) {
         first->value.f -= (float)second->value.i;
     }
     else {
-        fprintf(stderr, "[Fatal Error]: Invalid types for sub\n");
+        fprintf(stderr, "[Fatal Error][%d]: Invalid types for sub\n", line_number);
         exit(1);
     }
 }
@@ -302,7 +302,7 @@ void mul(Element *first, Element *second) {
      */
 
     if (first->type == TYPE_CHAR || second->type == TYPE_CHAR) {
-        fprintf(stderr, "[Fatal Error]: Attempt to mul char!\n");
+        fprintf(stderr, "[Fatal Error][%d]: Attempt to mul char!\n", line_number);
         exit(1);
     }
 
@@ -325,7 +325,7 @@ void mul(Element *first, Element *second) {
         first->value.f *= (float)second->value.i;
     }
     else {
-        fprintf(stderr, "[Fatal Error]: Invalid types for mul\n");
+        fprintf(stderr, "[Fatal Error][%d]: Invalid types for mul\n", line_number);
         exit(1);
     }
 }
@@ -337,14 +337,14 @@ void div_(Element *first, Element *second) {
      */
 
     if (first->type == TYPE_CHAR || second->type == TYPE_CHAR) {
-        fprintf(stderr, "[Fatal Error]: Attempt to div char!\n");
+        fprintf(stderr, "[Fatal Error][%d]: Attempt to div char!\n", line_number);
         exit(1);
     }
 
     // Checking for division by zero for int and float (0.0f)
     if ((second->type == TYPE_INT   && second->value.i == 0) ||
         (second->type == TYPE_FLOAT && second->value.f == 0.0f)) {
-        fprintf(stderr, "[Fatal Error]: Division by zero!\n");
+        fprintf(stderr, "[Fatal Error][%d]: Division by zero!\n", line_number);
         exit(1);
     }
 
@@ -367,7 +367,7 @@ void div_(Element *first, Element *second) {
         first->value.f /= (float)second->value.i;
     }
     else {
-        fprintf(stderr, "[Fatal Error]: Invalid types for div\n");
+        fprintf(stderr, "[Fatal Error][%d]: Invalid types for div\n", line_number);
         exit(1);
     }
 }
@@ -421,14 +421,14 @@ void check_file_extension(char *file_path)
 
 void is_overflow() {
     if (stack_pointer+1 >= STACK_SIZE) {
-        fprintf(stderr, "[Fatal Error]: Stack overflow.\n");
+        fprintf(stderr, "[Fatal Error][%d]: Stack overflow.\n", line_number);
         exit(1);
     }
 }
 
 void is_underflow() {
     if (stack_pointer-1 <= -2) {
-        fprintf(stderr, "[Fatal Error]: Stack underflow.\n");
+        fprintf(stderr, "[Fatal Error][%d]: Stack underflow.\n", line_number);
         exit(1);
     }
 }
@@ -474,7 +474,7 @@ Element* process_token(char* tk, Element* stack, Element* r_register, Element* r
             //printf("[process_token]: arg = r%d\n", reg_index);
             return &registers[reg_index];
         } else {
-            fprintf(stderr, "[Syntax Error]: Non-existent register on line %d.\n", line_number);
+            fprintf(stderr, "[Syntax Error][%d]: Non-existent register.\n", line_number);
             exit(1);
         }
     }
@@ -774,7 +774,7 @@ int main(int argc, char *argv[]) {
         }
 
         default:
-            fprintf(stderr, "[Syntax error]: unknown instruction: \n%s \n   ...at the line %d.\n", line, line_number);
+            fprintf(stderr, "[Syntax error][%d]: unknown instruction: \n%s.\n", line_number, line);
             break;
         }
     }
