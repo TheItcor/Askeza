@@ -90,20 +90,20 @@ successful end.
 
 | Ошибка                                                  | значение                              |
 | ------------------------------------------------------- | ------------------------------------- |
-| `[Fatal Error]: Stack overflow`                         | Стек переполнен. Указатель стека провалился за верхние ограничения.|
-| `[Syntax Error]: Unknown instruction /command/ at line /number/.`  | Синтаксическая ошибка + номер строки.  |
+| `[Fatal Error][line]: Stack overflow`                         | Стек переполнен. Указатель стека провалился за верхние ограничения.|
+| `[Syntax Error][line]: Unknown instruction /command/ at line /number/.`  | Синтаксическая ошибка + номер строки.  |
 | `[Read Error]: This file does not exist. Wrong path?.` | Не существует файла для интерпретации |
 | `[Read Error]: This file does have right extension .ask!` | Файл с неправильным расширением.   |
 | `[Read Error]: Arguments needed!`                      | Не был передан хотя бы один аргумент.  |
-| `[Fatal Error]: Label main not found.`                 | Не была найден точка старта программы|
-| `[Fatal Error]: Attempt to add char!`                  | Попытка сложить символы (буквы).       |
-| `[Fatal Error]: Stack underflow`                       | Стек опустошен. Указатель стека провалился за нижние ограничения. |
-| `[Fatal Error]: Invalid types for add`                 | Ошибка при сложении, связанная с типами. |
-| `[Syntax Error]: Non-existent register on line`        | Попытка задействовать несуществующий регистр.  |
-| `[Fatal Error]: Invalid types for sub`                 | Ошибка при вычитании, связанная с типами. |
-| `[Fatal Error]: Invalid types for mul`                 | Ошибка при умножении, связанная с типами. |
-| `[Fatal Error]: Invalid types for div`                 | Ошибка при делении, связанная с типами. |
-| `[Fatal Error]: Division by zero!`                     | Попытка деления на ноль. |
+| `[Fatal Error][line]: Label main not found.`                 | Не была найден точка старта программы|
+| `[Fatal Error][line]: Attempt to add char!`                  | Попытка сложить символы (буквы).       |
+| `[Fatal Error][line]: Stack underflow`                       | Стек опустошен. Указатель стека провалился за нижние ограничения. |
+| `[Fatal Error][line]: Invalid types for add`                 | Ошибка при сложении, связанная с типами. |
+| `[Syntax Error][line]: Non-existent register on line`        | Попытка задействовать несуществующий регистр.  |
+| `[Fatal Error][line]: Invalid types for sub`                 | Ошибка при вычитании, связанная с типами. |
+| `[Fatal Error][line]: Invalid types for mul`                 | Ошибка при умножении, связанная с типами. |
+| `[Fatal Error][line]: Invalid types for div`                 | Ошибка при делении, связанная с типами. |
+| `[Fatal Error][line]: Division by zero!`                     | Попытка деления на ноль. |
 | `[Syntax Error][line]: Unknow type on input`                       | Указан неверный тип. |
 | `[Fatal Error][line]: Failed to read integer`                      | Некорректное целое число при вводе. |
 | `[Fatal Error][line]: Failed to read float`                        | Некорректное число с плавающей точкой при вводе.   |

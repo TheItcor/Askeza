@@ -90,20 +90,20 @@ During the interpreter's operation, an error may be detected:
 
 | Error                                                              | Meaning                                       |
 | -------------------------------------------------------------------| ----------------------------------------------|
-| `[Fatal Error]: Stack overflow`                                    | Stack overflow. The stack pointer has flown beyond its upper limits. |
-| `[Syntax Error]: Unknown instruction /command/ at line /number/.`  | Syntax error + line number.                   |
+| `[Fatal Error][line]: Stack overflow`                                    | Stack overflow. The stack pointer has flown beyond its upper limits. |
+| `[Syntax Error][line]: Unknown instruction /command/.`                   | Syntax error in command.                          |
 | `[Read Error]: This file does not exist. Wrong path?.`             | The file for interpretation does not exist.   |
 | `[Read Error]: This file does have right extension .ask!`          | File has the wrong extension.                 |
 | `[Read Error]: Arguments needed!`                                  | No arguments were provided.                   |
-| `[Fatal Error]: Label main not found.`                             | Program entry point (label 'main') not found. |
-| `[Fatal Error]: Attempt to add char!`                              | Trying to sum characters.                     |
-| `[Fatal Error]: Stack underflow`                                   | Stack underflow. The stack pointer fell below its lower limits. |
-| `[Fatal Error]: Invalid types for add`                             | Error related to types when adding. |
-| `[Syntax Error]: Non-existent register on line`                    | Attempt to use a non-existent register.  |
-| `[Fatal Error]: Invalid types for sub`                             | Error related to types when subtraction. |
-| `[Fatal Error]: Invalid types for mul`                             | Error related to types when multiplication. |
-| `[Fatal Error]: Invalid types for div`                             | Error related to types when division. |
-| `[Fatal Error]: Division by zero!`                                 | Attempt to divide by zero. |
+| `[Fatal Error][line]: Label main not found.`                             | Program entry point (label 'main') not found. |
+| `[Fatal Error][line]: Attempt to add char!`                              | Trying to sum characters.                     |
+| `[Fatal Error][line]: Stack underflow`                                   | Stack underflow. The stack pointer fell below its lower limits. |
+| `[Fatal Error][line]: Invalid types for add`                             | Error related to types when adding. |
+| `[Syntax Error][line]: Non-existent register on line`                    | Attempt to use a non-existent register.  |
+| `[Fatal Error][line]: Invalid types for sub`                             | Error related to types when subtraction. |
+| `[Fatal Error][line]: Invalid types for mul`                             | Error related to types when multiplication. |
+| `[Fatal Error][line]: Invalid types for div`                             | Error related to types when division. |
+| `[Fatal Error][line]: Division by zero!`                                 | Attempt to divide by zero. |
 | `[Syntax Error][line]: Unknow type on input`                       | Unknown type on input. |
 | `[Fatal Error][line]: Failed to read integer`                      | A non-integer was entered when input. |
 | `[Fatal Error][line]: Failed to read float`                        | A non-float was entered when input. |
