@@ -104,6 +104,11 @@ During the interpreter's operation, an error may be detected:
 | `[Fatal Error]: Invalid types for mul`                             | Error related to types when multiplication. |
 | `[Fatal Error]: Invalid types for div`                             | Error related to types when division. |
 | `[Fatal Error]: Division by zero!`                                 | Attempt to divide by zero. |
+| `[Syntax Error][line]: Unknow type on input`                       | Unknown type on input. |
+| `[Fatal Error][line]: Failed to read integer`                      | A non-integer was entered when input. |
+| `[Fatal Error][line]: Failed to read float`                        | A non-float was entered when input. |
+| `[Fatal Error][line]: Failed to read char`                         | A non-char was entered when input. |
+
 
 ---
 
@@ -137,7 +142,7 @@ A stack element or a register can hold the following data types:
 | copy (r/s) (r/s)                      | Copies a value from one location to another.                                                                                      | copy r0 r1                           | copy s r0                           |
 | pop (s) (&last N elements)            | Removes a value from the top of the stack.                                                                                        | pop s                                | pop s 3                             |
 | print (r/s) (&last N elements)        | Outputs to the console from a register / the top of the stack.                                                                    | print r0                             | print s 10                          |
-| input (r/s)                           | Inputs a value into a register / onto the top of the stack.                                                                       | input r0                             | input s                             |
+| input (int/float/char) (r/s)                           | Inputs a value into a register / onto the top of the stack.                                                                       | input int r0                             | input float s                             |
 | getline s                             | Inputs a string into the stack, split into characters.                                                                            |                                      | getline s                           |
 | add (r/s/n) (r/s/n)                   | Addition.                                                                                                                          | add r0 r1                            | add s                               |
 | sub (r/s/n) (&r/s/n)                  | Subtraction.                                                                                                                       | sub r0 r1                            | sub s                               |

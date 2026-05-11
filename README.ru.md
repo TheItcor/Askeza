@@ -104,6 +104,10 @@ successful end.
 | `[Fatal Error]: Invalid types for mul`                 | Ошибка при умножении, связанная с типами. |
 | `[Fatal Error]: Invalid types for div`                 | Ошибка при делении, связанная с типами. |
 | `[Fatal Error]: Division by zero!`                     | Попытка деления на ноль. |
+| `[Syntax Error][line]: Unknow type on input`                       | Указан неверный тип. |
+| `[Fatal Error][line]: Failed to read integer`                      | Некорректное целое число при вводе. |
+| `[Fatal Error][line]: Failed to read float`                        | Некорректное число с плавающей точкой при вводе.   |
+| `[Fatal Error][line]: Failed to read char`                         | Некорректный символ (буква) при вводе. |
 
 ---
 
@@ -138,7 +142,7 @@ successful end.
 | copy (r/s) (r/s)                     | Копировать значение из одного места в другое                                                                                        | copy r0 r1                          | copy s r0                          |
 | pop (s) (&последние N-элементов)     | Удалить значение из вершины стека                                                                                                   | pop s                               | pop s 3                            |
 | print (r/s) (&последние N-элементов) | Вывести в консоль из регистра / вершины стека                                                                                       | print r0                            | print s 10                         |
-| input (r/s)                          | ввести в регистр / вершину стека                                                                                                    | input r0                            | input s                            |
+| input (int/float/char) (r/s)                          | ввести в регистр / вершину стека                                                                                                    | input int r0                            | input float s                            |
 | getline s                            | ввести в стек строку разбитую на символы                                                                                            |                                     | getline s                          |
 | add (r/s/n) (r/s/n)                  | Сложение                                                                                                                            | add r0 r1                           | add s                              |
 | sub (r/s/n) (&r/s/n)                 | Вычитание                                                                                                                           | sub r0 r1                           | sub s                              |
