@@ -667,6 +667,11 @@ int main(int argc, char *argv[]) {
 
         case OP_PRINT: {
             Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
+
+            if (first_arg == stack) {
+                first_arg = &stack[stack_pointer];
+            }
+
             prints(first_arg);
 
             break;
