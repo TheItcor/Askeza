@@ -37,7 +37,7 @@ ask main.ask
 
 run with debugger:
 ```
-ask -dbg main.ask
+ask -d main.ask
 ```
 
 Change the stack size in elements (default: 1024 elements):
