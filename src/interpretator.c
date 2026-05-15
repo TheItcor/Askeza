@@ -13,7 +13,7 @@
  * [x] True interpretation of main instructions:
  *     push, pop, swap, copy, print, input(?)
  * [x] Interpretation of math instructions:
- *     add, mul, sub, div, idiv
+ *     add, mul, sub, div, mod
  * [ ] Split the error header.
  * [ ] Add optional debugger
  * */
@@ -24,6 +24,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <sys/types.h>
 
 //#include "throwErrors.h"?
 //#include "stackRegisters.h"?
@@ -80,7 +81,7 @@ typedef enum {
     OP_MUL,
     OP_SUB,
     OP_DIV,
-    OP_IDIV,
+    OP_MOD,
     OP_JMP,
     OP_IF,
     OP_RET,
@@ -102,7 +103,7 @@ OP_CODE get_op_code(char *operation){
     if (strcmp(operation, "mul") == 0) return OP_MUL;
     if (strcmp(operation, "sub") == 0) return OP_SUB;
     if (strcmp(operation, "div") == 0) return OP_DIV;
-    if (strcmp(operation, "idiv") == 0) return OP_IDIV;
+    if (strcmp(operation, "mod") == 0) return OP_MOD;
     if (strcmp(operation, "jmp") == 0) return OP_JMP;
     if (strcmp(operation, "ret") == 0) return OP_RET;
     if (strcmp(operation, "end") == 0) return OP_END;
@@ -374,7 +375,7 @@ void div_(Element *first, Element *second) {
 }
 
 
-void idiv(Element *first, Element *second) {
+void mod(Element *first, Element *second) {
     /* modulo operation
      * first = first % second
      */
@@ -384,12 +385,13 @@ void idiv(Element *first, Element *second) {
         exit(1);
     }
 
-    // Checking for division by zero for int and float (0.0f)
-    // Reject char and void types
+    // Reject char types
     if (first->type == TYPE_CHAR || second->type == TYPE_CHAR) {
         fprintf(stderr, "[Fatal Error][%d]: Cannot apply modulo to char\n", line_number);
         exit(1);
     }
+
+    // Reject void types
     if (first->type == TYPE_VOID || second->type == TYPE_VOID) {
         fprintf(stderr, "[Fatal Error][%d]: Cannot apply modulo to void\n", line_number);
         exit(1);
@@ -794,13 +796,13 @@ int main(int argc, char *argv[]) {
             break;
         }
 
-        case OP_IDIV: {
+        case OP_MOD: {
             //printf("[Debugger]: %d. IDIV\n", line_number);
 
             Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
             Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
 
-            idiv(first_arg, second_arg);
+            mod(first_arg, second_arg);
 
             break;
         }
