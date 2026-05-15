@@ -13,4 +13,4 @@ C_FILES=$(find src -name "*.c")
 H_FILES=$(find include -name "*.h")
 
 # Compile
-clang $C_FILES -Iinclude -o ask
+clang $C_FILES -Iinclude -o ask -lm
