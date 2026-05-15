@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 
 //#include "throwErrors.h"?
 //#include "stackRegisters.h"?
@@ -373,7 +374,57 @@ void div_(Element *first, Element *second) {
 }
 
 
-void idiv() {}
+void idiv(Element *first, Element *second) {
+    /* modulo operation
+     * first = first % second
+     */
+
+    if (first->type == TYPE_CHAR || second->type == TYPE_CHAR) {
+        fprintf(stderr, "[Fatal Error][%d]: Attempt to modulo char!\n", line_number);
+        exit(1);
+    }
+
+    // Checking for division by zero for int and float (0.0f)
+    // Reject char and void types
+    if (first->type == TYPE_CHAR || second->type == TYPE_CHAR) {
+        fprintf(stderr, "[Fatal Error][%d]: Cannot apply modulo to char\n", line_number);
+        exit(1);
+    }
+    if (first->type == TYPE_VOID || second->type == TYPE_VOID) {
+        fprintf(stderr, "[Fatal Error][%d]: Cannot apply modulo to void\n", line_number);
+        exit(1);
+    }
+
+    // Check for division by zero (int zero or float near zero)
+    if ((second->type == TYPE_INT && second->value.i == 0) ||
+        (second->type == TYPE_FLOAT && fabsf(second->value.f) < 1e-6f)) {
+        fprintf(stderr, "[Fatal Error][%d]: Modulo by zero\n", line_number);
+        exit(1);
+    }
+
+    // Both int
+    if (first->type == TYPE_INT && second->type == TYPE_INT) {
+        first->value.i %= second->value.i;
+    }
+    // Both float
+    else if (first->type == TYPE_FLOAT && second->type == TYPE_FLOAT) {
+        first->value.f = fmodf(first->value.f, second->value.f);
+    }
+    // int % float -> float
+    else if (first->type == TYPE_INT && second->type == TYPE_FLOAT) {
+        float a = (float)first->value.i;
+        first->value.f = fmodf(a, second->value.f);
+        first->type = TYPE_FLOAT;
+    }
+    // float % int -> float
+    else if (first->type == TYPE_FLOAT && second->type == TYPE_INT) {
+        first->value.f = fmodf(first->value.f, (float)second->value.i);
+    }
+    else {
+        fprintf(stderr, "[Fatal Error][%d]: Invalid types for modulo\n", line_number);
+        exit(1);
+    }
+}
 
 
 void jmp() {}
@@ -744,7 +795,13 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_IDIV: {
-            printf("[Debugger]: %d. IDIV\n", line_number);
+            //printf("[Debugger]: %d. IDIV\n", line_number);
+
+            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+
+            idiv(first_arg, second_arg);
+
             break;
         }
 
