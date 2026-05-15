@@ -69,15 +69,32 @@ main:
     end 0
 ```
 
-`ask -dbg main.ask`
+`ask -d main.ask`
 
 ```
-10 -> stack [10]
-30 -> stack [10, 30]
-10+30 -> stack [40]
-stack -> register_0 [40]
-print: 40
-successful end.
+===== DEBUGGER ON! =====
+Stack size: 1024
+Amount of registers: 4
+========================
+[1]: LABEL
+[2]: PUSH s <- 10  |  [SP: 0 -> 1]
+[3]: PUSH s <- 30  |  [SP: 1 -> 2]
+[4]: ADD
+[5]: PUSH r0 <- s  |  [SP: 0 -> 1]
+[6]: PRINT: 30
+[7]: END
+========================
+
+Stack:
+[0][40, TYPE_INT]
+
+Registers:
+[r0][30, TYPE_INT]
+[r1][0, TYPE_VOID]
+[r2][0, TYPE_VOID]
+[r3][0, TYPE_VOID]
+
+[Stack Pointer -> 0]
 ```
 
 ## interpreter's errors
