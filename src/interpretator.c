@@ -15,7 +15,7 @@
  * [x] Interpretation of math instructions:
  *     add, mul, sub, div, mod
  * [ ] Split the error header.
- * [ ] Add optional debugger
+ * [x] Add optional debugger
  * */
 
 #include <ctype.h>
@@ -28,6 +28,10 @@
 
 //#include "throwErrors.h"?
 //#include "stackRegisters.h"?
+
+// optional debugger
+#define DPRINT(...) (debug && printf(__VA_ARGS__))
+int debug = 0;
 
 int STACK_SIZE = 1024;
 int REGISTER_NUMBER = 4;
@@ -42,12 +46,14 @@ typedef enum {
     TYPE_VOID   // = int 0
 } DataType;
 
+
 // Value of Stack/Register
 typedef union {
     char c;
     int i;
     float f;
 } Value;
+
 
 // One element of Stack/Register
 typedef struct {
@@ -57,7 +63,6 @@ typedef struct {
 
 
 // Stack/Register initilization
-
 void init(Element *regstack, int size) {
     for (int i = 0; i < size; i++)
     {
@@ -67,8 +72,19 @@ void init(Element *regstack, int size) {
 }
 
 
-// Instuctions
+// for debugging
+const char* type_name(DataType t) {
+    switch (t) {
+        case TYPE_CHAR:  return "TYPE_CHAR";
+        case TYPE_INT:   return "TYPE_INT";
+        case TYPE_FLOAT: return "TYPE_FLOAT";
+        case TYPE_VOID:  return "TYPE_VOID";
+        default:         return "UNKNOWN";
+    }
+}
 
+
+// Instuctions
 typedef enum {
     OP_PUSH,
     OP_POP,
@@ -587,17 +603,19 @@ Element* process_token(char* tk, Element* stack, Element* r_register, Element* r
 int main(int argc, char *argv[]) {
     /* Arguments:
      * argv[0] - ask
-     * argv[?] - debugger on
+     * argv[1] - debugger on
      * argv[?] - stack size
      * argv[?] - amount of registers
      * argv[argc-1] (last) - file name
      *
      * example:
-     * ask dbg s512 r10 file.ask
+     * ask -d s512 r10 file.ask
      */
 
-
     // Analise all arguments. Throw errors.
+    debug |= !strcmp(argv[1], "-d");
+    DPRINT("===== DEBUGGER ON! =====\n");
+
     if (argc < 2)
     {
         fprintf(stderr, "[Read error]: Arguments needed!\n");
@@ -617,9 +635,9 @@ int main(int argc, char *argv[]) {
     init(stack, STACK_SIZE);
     init(registers, REGISTER_NUMBER);
 
-    //printf("[Debugger]: Stack size: %d\n", STACK_SIZE);
-    //printf("[Debugger]: Amount of registers: %d\n", REGISTER_NUMBER);
-
+    DPRINT("Stack size: %d\n", STACK_SIZE);
+    DPRINT("Amount of registers: %d\n", REGISTER_NUMBER);
+    DPRINT("========================\n");
 
     // Reading .ask file
     FILE *file = fopen(argv[argc-1], "r");
@@ -633,7 +651,6 @@ int main(int argc, char *argv[]) {
 
     while (fgets(line, sizeof(line), file) != NULL)
     {
-        //printf("[Stack pointer][%d]: %d\n", line_number, stack_pointer);
         line_number++;
         tk_count = 0;
 
@@ -667,7 +684,7 @@ int main(int argc, char *argv[]) {
         switch (operation)
         {
         case OP_PUSH: {
-            //printf("[Debugger]: %d. PUSH\n", line_number);
+            DPRINT("[%d]: PUSH %s <- %s  |  ", line_number, tokens[1], tokens[2]);
             // Reading arguments & get address of them
             Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
             Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
@@ -685,12 +702,15 @@ int main(int argc, char *argv[]) {
 
             push(first_arg, second_arg);
 
+            DPRINT("[SP: %d -> %d]\n", stack_pointer, stack_pointer+1);
             break;
         }
 
         case OP_POP: {
-            //printf("[Debugger]: %d. POP\n", line_number);
+            DPRINT("[%d]: POP  |  ", line_number);
             pop(&stack[stack_pointer]);
+
+            DPRINT("[SP: %d -> %d]\n", stack_pointer, stack_pointer-1);
             break;
         }
 
@@ -704,6 +724,7 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_COPY: {
+            DPRINT("[%d]: COPY\n", line_number);
             Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
             Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
 
@@ -719,6 +740,7 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_PRINT: {
+            DPRINT("[%d]: PRINT: ", line_number);
             Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
 
             if (first_arg == stack) {
@@ -726,12 +748,11 @@ int main(int argc, char *argv[]) {
             }
 
             prints(first_arg);
-
             break;
         }
 
         case OP_INPUT: {
-            //printf("[Debugger]: %d. INPUT\n", line_number);
+            DPRINT("[%d]: INPUT %s <- ", line_number, tokens[2]);
 
             //Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
             Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
@@ -748,12 +769,12 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_GETLINES: {
-            printf("[Debugger]: %d. GETLINES\n", line_number);
+            DPRINT("[%d]: GETLINES\n", line_number);
             break;
         }
 
         case OP_ADD: {
-            //printf("[Debugger]: %d. ADD\n", line_number);
+            DPRINT("[%d]: ADD\n", line_number);
 
             Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
             Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
@@ -764,7 +785,7 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_MUL: {
-            //printf("[Debugger]: %d. MUL\n", line_number);
+            DPRINT("[%d]: MUL\n", line_number);
 
             Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
             Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
@@ -775,7 +796,7 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_SUB: {
-            //printf("[Debugger]: %d. SUB\n", line_number);
+            DPRINT("[%d]: SUB\n", line_number);
 
             Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
             Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
@@ -786,7 +807,7 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_DIV: {
-            //printf("[Debugger]: %d. DIV\n", line_number);
+            DPRINT("[%d]: DIV\n", line_number);
 
             Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
             Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
@@ -797,7 +818,7 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_MOD: {
-            //printf("[Debugger]: %d. IDIV\n", line_number);
+            DPRINT("[%d]: MOD\n", line_number);
 
             Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
             Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
@@ -808,32 +829,34 @@ int main(int argc, char *argv[]) {
         }
 
         case OP_JMP: {
-            printf("[Debugger]: %d. JMP\n", line_number);
+            DPRINT("[%d]: JPM\n", line_number);
             break;
         }
 
         case OP_IF: {
-            printf("[Debugger]: %d. IF\n", line_number);
+            DPRINT("[%d]: IF\n", line_number);
             break;
         }
 
         case OP_RET: {
-            printf("[Debugger]: %d. RET\n", line_number);
+            DPRINT("[%d]: RET\n", line_number);
             break;
         }
 
         case OP_END: {
-            printf("[Debugger]: %d. END\n", line_number);
+            DPRINT("[%d]: END\n", line_number);
+            //printf("[Debugger]: %d. END\n", line_number);
             goto end;
         }
 
         case OP_LABEL: {
-            printf("[Debugger]: %d. MAIN!\n", line_number);
+            DPRINT("[%d]: LABEL\n", line_number);
+            //printf("[Debugger]: %d. LABEL!\n", line_number);
             break;
         }
 
         default:
-            fprintf(stderr, "[Syntax error][%d]: unknown instruction: \n%s.\n", line_number, line);
+            fprintf(stderr, "[Syntax error][%d]: unknown instruction: \n%s\n", line_number, line);
             break;
         }
     }
@@ -842,32 +865,29 @@ int main(int argc, char *argv[]) {
 
     if (flag_main == 0) fprintf(stderr, "[Fatal Error]: Label main not found.");
 
-    // Primitive debug
-    // const char* type_name(DataType t) {
-    //     switch (t) {
-    //         case TYPE_CHAR:  return "TYPE_CHAR";
-    //         case TYPE_INT:   return "TYPE_INT";
-    //         case TYPE_FLOAT: return "TYPE_FLOAT";
-    //         case TYPE_VOID:  return "TYPE_VOID";
-    //         default:         return "UNKNOWN";
-    //     }
-    // }
-    // for (int i = 0; i < (int)(STACK_SIZE/16); i++) {
-    //     printf("%d ", stack[i].value.i);
-    // }
-    // printf("\n");
-    // for (int i = 0; i < (int)(STACK_SIZE/16); i++) {
-    //     printf("%s ", type_name(stack[i].type));
-    // }
-    // printf("\n\n\n");
-    // for (int i = 0; i < REGISTER_NUMBER; i++) {
-    //     printf("%d ", registers[i].value.i);
-    // }
-    // for (int i = 0; i < (int)(STACK_SIZE/16); i++) {
-    //     printf("%s ", type_name(registers[i].type));
-    // }
-    // printf("\n\n\n");
-    //printf("[Stack pointer]: %d\n", stack_pointer);
+    // debug in end
+    if (debug)
+    {
+        DPRINT("========================\n");
+        DPRINT("\nStack: \n");
+        int count = 1;
+        for (int i = 0; i < (int)(STACK_SIZE); i++) {
+            if (stack[i].value.i == 0 && stack[i].type == TYPE_VOID) {
+                break;
+            }
 
+            DPRINT("[%d][%d, %s]   ", i, stack[i].value.i, type_name(stack[i].type));
+            if (count % 6 == 0) { printf("\n"); }
+            count++;
+        }
+        printf("\n\n");
+
+        DPRINT("Registers: \n");
+        for (int i = 0; i < REGISTER_NUMBER; i++) {
+            printf("[r%d][%d, %s]\n", i, registers[i].value.i, type_name(stack[i].type));
+        }
+        printf("\n");
+        printf("[Stack Pointer -> %d]\n", stack_pointer);
+    }
     return 0;
 }
