@@ -1,6 +1,6 @@
 /* ==== Virtual Stack Machine Interpretator (Askeza) ====
  *
- * Version: 1.3.0 "Socrates"
+ * Version: 2.0.0 "Socrates"
  * Started: 16.12.2025
  * Github (documentation and etc): https://github.com/TheItcor/Askeza
  *
@@ -29,12 +29,13 @@
 //#include "throwErrors.h"?
 //#include "stackRegisters.h"?
 
-// optional debugger
+// Optional debugger
 #define DPRINT(...) (debug && printf(__VA_ARGS__))
 int debug = 0;
 
-int STACK_SIZE = 1024;
-int REGISTER_NUMBER = 4;
+// Global Virtual Machine state
+#define STACK_SIZE 1024             // this is a temporary solution. In the future, the value can be changed before program starts
+#define REGISTER_NUMBER 4
 int stack_pointer = -1;             // if -1, then stack is empty
 int line_number = 0;                // for throwing errors
 
@@ -99,11 +100,13 @@ typedef enum {
     OP_DIV,
     OP_MOD,
     OP_JMP,
+    OP_CALL,
     OP_IF,
     OP_RET,
     OP_END,
     OP_LABEL,
-    OP_UNKNOW
+    OP_UNKNOW,
+    OP_IMPORT,
 } OP_CODE;
 
 
@@ -121,9 +124,11 @@ OP_CODE get_op_code(char *operation){
     if (strcmp(operation, "div") == 0) return OP_DIV;
     if (strcmp(operation, "mod") == 0) return OP_MOD;
     if (strcmp(operation, "jmp") == 0) return OP_JMP;
+    if (strcmp(operation, "call") == 0) return OP_CALL;
     if (strcmp(operation, "ret") == 0) return OP_RET;
     if (strcmp(operation, "end") == 0) return OP_END;
     if (strcmp(operation, "if") == 0) return OP_IF;
+    if (strcmp(operation, "import") == 0) return OP_IMPORT;
     if (strchr(operation, ':') != NULL) return OP_LABEL;
 
     return OP_UNKNOW;
@@ -616,50 +621,13 @@ int main(int argc, char *argv[]) {
     debug |= !strcmp(argv[1], "-d");
     DPRINT("===== DEBUGGER ON! =====\n");
 
-    if (argc < 2)
-    {
-        fprintf(stderr, "[Read error]: Arguments needed!\n");
-        exit(1);
-    }
-
-    check_file_path(argv[argc-1]);      // is real file or no?
-    check_file_extension(argv[argc-1]); // is .ask file or no?
-
-    // Initialization of Stack & Registers
-
-    Element stack[STACK_SIZE];
-    Element registers[REGISTER_NUMBER]; // [0] = r0, [1] = r1, ...
-    Element return_register;            // rr
-    Element temp_value;                 // for pushing separate char/int/float to stack/register: push s 5
-
-    init(stack, STACK_SIZE);
-    init(registers, REGISTER_NUMBER);
-
-    DPRINT("Stack size: %d\n", STACK_SIZE);
-    DPRINT("Amount of registers: %d\n", REGISTER_NUMBER);
-    DPRINT("========================\n");
-
-    // Reading .ask file
-    FILE *file = fopen(argv[argc-1], "r");
-
-    char line[256];      // one line of file.ask
-    char *tokens[8];     // array for tokens
-    char *tk;            // token
-    int tk_count;        // tokens count
-    line_number = 0;     // line numbers for error throws
-    short flag_main = 0; // is "main" started?
-
-    while (fgets(line, sizeof(line), file) != NULL)
-    {
-        line_number++;
-        tk_count = 0;
-
-        // Delete comments
-        strip_comment(line);
-
-        // Finds the "main" label, if it's not there, then just skips everything else.
-        if (!flag_main && !strstr(line, "main:")) continue;
-        if (!flag_main) flag_main = 1;
+/* ----------------------------------------------------------- */
+// Global elements
+Element stack[STACK_SIZE];
+Element registers[REGISTER_NUMBER]; // [0] = r0, [1] = r1, ...
+Element return_register;            // rr
+Element temp_value;                 // for pushing separate char/int/float to stack/register: push s 5
+/* ----------------------------------------------------------- */
 
         line[strcspn(line, "\n")] = '\0'; // no "\n" in my lines!
 
@@ -668,7 +636,10 @@ int main(int argc, char *argv[]) {
         // If line is empty just skip it. Maybe TODO: skip empty (even with spaces) line before tokenization
         if (tk == NULL) continue;
 
-        tokens[tk_count++] = tk;  // first token
+void execute_instruction(Instruction *instr) {
+    int ln = instr->line_number;   // use stored line number for errors & debug
+    line_number = ln;              // update global so error functions know the right line
+    DPRINT("[%d]: ", ln);
 
         while ((tk = strtok(NULL, " ")) != NULL && tk_count < 8) {
             tokens[tk_count++] = tk;
