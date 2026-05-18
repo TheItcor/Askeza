@@ -954,7 +954,18 @@ int main(int argc, char *argv[]) {
     }
 
 
-    if (flag_main == 0) fprintf(stderr, "[Fatal Error]: Label main not found.");
+    // Free allocated memory
+    for (int i = 0; i < program_size; i++) {
+        for (int j = 0; j < program[i].token_count; j++) {
+            free(program[i].tokens[j]);
+        }
+    }
+    free(program);
+    for (int i = 0; i < label_count; i++) {
+        free(label_table[i].name);
+    }
+    free(label_table);
+
 
     // debug in end
     if (debug)
