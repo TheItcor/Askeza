@@ -97,37 +97,6 @@ Registers:
 [Stack Pointer -> 0]
 ```
 
-## Ошибки интерпретатора
-
-Во время работы интерпретатора может быть выявлена ошибка:
-
-* [Fatal Error] - Критическая ошибка при интерпретации кода.
-* [Syntax Error] - Синтаксическая ошибка.
-* [Read Error] - Ошибка при чтении файла.
-
-| Ошибка                                                  | значение                              |
-| ------------------------------------------------------- | ------------------------------------- |
-| `[Fatal Error][line]: Stack overflow`                         | Стек переполнен. Указатель стека провалился за верхние ограничения.|
-| `[Syntax Error][line]: Unknown instruction /command/ at line /number/.`  | Синтаксическая ошибка + номер строки.  |
-| `[Read Error]: This file does not exist. Wrong path?.` | Не существует файла для интерпретации |
-| `[Read Error]: This file does have right extension .ask!` | Файл с неправильным расширением.   |
-| `[Read Error]: Arguments needed!`                      | Не был передан хотя бы один аргумент.  |
-| `[Fatal Error][line]: Label main not found.`                 | Не была найден точка старта программы|
-| `[Fatal Error][line]: Attempt to add char!`                  | Попытка сложить символы (буквы).       |
-| `[Fatal Error][line]: Stack underflow`                       | Стек опустошен. Указатель стека провалился за нижние ограничения. |
-| `[Fatal Error][line]: Invalid types for add`                 | Ошибка при сложении, связанная с типами. |
-| `[Syntax Error][line]: Non-existent register on line`        | Попытка задействовать несуществующий регистр.  |
-| `[Fatal Error][line]: Invalid types for sub`                 | Ошибка при вычитании, связанная с типами. |
-| `[Fatal Error][line]: Invalid types for mul`                 | Ошибка при умножении, связанная с типами. |
-| `[Fatal Error][line]: Invalid types for div`                 | Ошибка при делении, связанная с типами. |
-| `[Fatal Error][line]: Division by zero!`                     | Попытка деления на ноль. |
-| `[Syntax Error][line]: Unknow type on input`                       | Указан неверный тип. |
-| `[Fatal Error][line]: Failed to read integer`                      | Некорректное целое число при вводе. |
-| `[Fatal Error][line]: Failed to read float`                        | Некорректное число с плавающей точкой при вводе.   |
-| `[Fatal Error][line]: Failed to read char`                         | Некорректный символ (буква) при вводе. |
-| `[Fatal Error][line]: Label '(...)' not found.`                     | Метка, указанная в jmp или call, не существует. |
-| `[Fatal Error][line]: Call stack overflow.`                         | Слишком много вложенных вызовов (превышен лимит 256).   |
-| `[Fatal Error][line]: Return without call.`                         | Встречена инструкция ret, когда стек вызовов пуст (не было ни одного call). |
 
 ---
 
@@ -371,3 +340,38 @@ main:
 then:
     jmp print_cool
 ```
+
+
+---
+
+## Ошибки интерпретатора
+
+Во время работы интерпретатора может быть выявлена ошибка:
+
+* [Fatal Error] - Критическая ошибка при интерпретации кода.
+* [Syntax Error] - Синтаксическая ошибка.
+* [Read Error] - Ошибка при чтении файла.
+
+| Ошибка                                                  | значение                              |
+| ------------------------------------------------------- | ------------------------------------- |
+| `[Fatal Error][line]: Stack overflow`                         | Стек переполнен. Указатель стека провалился за верхние ограничения.|
+| `[Syntax Error][line]: Unknown instruction /command/ at line /number/.`  | Синтаксическая ошибка + номер строки.  |
+| `[Read Error]: This file does not exist. Wrong path?.` | Не существует файла для интерпретации |
+| `[Read Error]: This file does have right extension .ask!` | Файл с неправильным расширением.   |
+| `[Read Error]: Arguments needed!`                      | Не был передан хотя бы один аргумент.  |
+| `[Fatal Error][line]: Label main not found.`                 | Не была найден точка старта программы|
+| `[Fatal Error][line]: Attempt to add char!`                  | Попытка сложить символы (буквы).       |
+| `[Fatal Error][line]: Stack underflow`                       | Стек опустошен. Указатель стека провалился за нижние ограничения. |
+| `[Fatal Error][line]: Invalid types for add`                 | Ошибка при сложении, связанная с типами. |
+| `[Syntax Error][line]: Non-existent register on line`        | Попытка задействовать несуществующий регистр.  |
+| `[Fatal Error][line]: Invalid types for sub`                 | Ошибка при вычитании, связанная с типами. |
+| `[Fatal Error][line]: Invalid types for mul`                 | Ошибка при умножении, связанная с типами. |
+| `[Fatal Error][line]: Invalid types for div`                 | Ошибка при делении, связанная с типами. |
+| `[Fatal Error][line]: Division by zero!`                     | Попытка деления на ноль. |
+| `[Syntax Error][line]: Unknow type on input`                       | Указан неверный тип. |
+| `[Fatal Error][line]: Failed to read integer`                      | Некорректное целое число при вводе. |
+| `[Fatal Error][line]: Failed to read float`                        | Некорректное число с плавающей точкой при вводе.   |
+| `[Fatal Error][line]: Failed to read char`                         | Некорректный символ (буква) при вводе. |
+| `[Fatal Error][line]: Label '(...)' not found.`                     | Метка, указанная в jmp или call, не существует. |
+| `[Fatal Error][line]: Call stack overflow.`                         | Слишком много вложенных вызовов (превышен лимит 256).   |
+| `[Fatal Error][line]: Return without call.`                         | Встречена инструкция ret, когда стек вызовов пуст (не было ни одного call). |
