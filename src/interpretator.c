@@ -647,23 +647,72 @@ void execute_instruction(Instruction *instr) {
     switch (instr->op) {
 
         case OP_PUSH: {
-            DPRINT("PUSH %s <- %s  |  ", instr->tokens[1], instr->tokens[2]);
-            int old_sp = stack_pointer;   // remember stack pointer before changes
-            // Reading arguments & get address of them
-            Element *first_arg = process_token(instr->tokens[1], stack, &return_register, registers, &temp_value);
-            Element *second_arg = process_token(instr->tokens[2], stack, &return_register, registers, &temp_value);
+            Element *dest_base = process_token(instr->tokens[1], stack, &return_register, registers, &temp_value);
+            int regular = (dest_base != stack) || (instr->token_count <= 3);
 
-            // If destination is stack -> push a new element on top
-            if (first_arg == stack) {
-                is_overflow();
-                stack_pointer++;
-                first_arg = &stack[stack_pointer];
-            }
-            // If source is stack -> take value from top and then pop it
-            if (second_arg == stack) {
-                is_underflow();
-                second_arg = &stack[stack_pointer];
-                stack_pointer--;
+            if (dest_base == stack && !regular) {
+                // multi-push: more than one source token or a single quoted string
+                int old_sp = stack_pointer;
+                for (int i = 2; i < instr->token_count; i++) {
+                    char *src_tok = instr->tokens[i];
+                    int slen = strlen(src_tok);
+                    if ((src_tok[0] == '"' || src_tok[0] == '\'') && slen > 2 && src_tok[slen-1] == src_tok[0]) {
+                        // quoted string: push each character
+                        for (int j = slen-2; j >= 1; j--) {
+                            is_overflow();
+                            stack_pointer++;
+                            stack[stack_pointer].type = TYPE_CHAR;
+                            stack[stack_pointer].value.c = src_tok[j];
+                        }
+                    } else {
+                        // single element
+                        Element *src = process_token(src_tok, stack, &return_register, registers, &temp_value);
+                        if (src == stack) {
+                            is_underflow();
+                            Element top = stack[stack_pointer];
+                            stack_pointer--;
+                            is_overflow();
+                            stack_pointer++;
+                            push(&stack[stack_pointer], &top);
+                        } else {
+                            is_overflow();
+                            stack_pointer++;
+                            push(&stack[stack_pointer], src);
+                        }
+                    }
+                }
+                DPRINT("PUSH s multi  |  [SP: %d -> %d]\n", old_sp, stack_pointer);
+            } else {
+                // regular push (register or stack with single source)
+                DPRINT("PUSH %s <- %s  |  ", instr->tokens[1], instr->tokens[2]);
+                int old_sp = stack_pointer;
+                Element *first_arg = dest_base;
+                char *src_tok = instr->tokens[2];
+                int slen = strlen(src_tok);
+
+                // Handle quoted string for regular push
+                if (first_arg == stack && (src_tok[0] == '"' || src_tok[0] == '\'') && slen > 2 && src_tok[slen-1] == src_tok[0]) {
+                    for (int j = slen-2; j >= 1; j--) {
+                        is_overflow();
+                        stack_pointer++;
+                        stack[stack_pointer].type = TYPE_CHAR;
+                        stack[stack_pointer].value.c = src_tok[j];
+                    }
+                } else {
+                    Element *second_arg = process_token(src_tok, stack, &return_register, registers, &temp_value);
+                    if (first_arg == stack) {
+                        is_overflow();
+                        stack_pointer++;
+                        first_arg = &stack[stack_pointer];
+                    }
+                    if (second_arg == stack) {
+                        is_underflow();
+                        second_arg = &stack[stack_pointer];
+                        stack_pointer--;
+                    }
+                    push(first_arg, second_arg);
+                }
+                DPRINT("[SP: %d -> %d]\n", old_sp, stack_pointer);
             }
 
             push(first_arg, second_arg);
