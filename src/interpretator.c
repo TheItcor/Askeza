@@ -258,7 +258,6 @@ void inputs(char type, Element *element) {
                 fprintf(stderr, "[Fatal Error][%d]: Failed to read integer\n", line_number);
                 exit(1);
             }
-
             break;
 
         // input float -> element
@@ -268,7 +267,6 @@ void inputs(char type, Element *element) {
                 fprintf(stderr, "[Fatal Error][%d]: Failed to read float\n", line_number);
                 exit(1);
             }
-
             break;
 
         // input char -> element
@@ -278,11 +276,10 @@ void inputs(char type, Element *element) {
                 fprintf(stderr, "[Fatal Error][%d]: Failed to read char\n", line_number);
                 exit(1);
             }
-
             break;
 
         default:
-            fprintf(stderr, "[Syntax Error][%d]: Unknow type on input", line_number);
+            fprintf(stderr, "[Syntax Error][%d]: Unknown type on input\n", line_number);
             exit(1);
     }
 }
@@ -449,12 +446,6 @@ void mod(Element *first, Element *second) {
         exit(1);
     }
 
-    // Reject char types
-    if (first->type == TYPE_CHAR || second->type == TYPE_CHAR) {
-        fprintf(stderr, "[Fatal Error][%d]: Cannot apply modulo to char\n", line_number);
-        exit(1);
-    }
-
     // Reject void types
     if (first->type == TYPE_VOID || second->type == TYPE_VOID) {
         fprintf(stderr, "[Fatal Error][%d]: Cannot apply modulo to void\n", line_number);
@@ -548,7 +539,7 @@ void strip_comment(char *line) {
 
 Element* process_token(char* tk, Element* stack, Element* r_register, Element* registers, Element* temp_value) {
     /* Parses the string (argument) and then returns the address:
-    * "s"   -> stack address
+    * "s"   -> stack address (base of stack array)
     * "rr"  -> return_register addres
     * "r0"  -> registers[0] adress
     * ""a"" -> temp_value (a)(char) address
@@ -559,7 +550,7 @@ Element* process_token(char* tk, Element* stack, Element* r_register, Element* r
     // Check for (stack)
     if (strcmp(tk, "s") == 0) {
         //printf("[process_token]: arg = stack\n");
-        return stack;
+        return stack;   // return base address, caller will adjust with stack_pointer
     }
     // Check for "rr" (return register)
     else if (strcmp(tk, "rr") == 0) {
@@ -637,21 +628,7 @@ Element* process_token(char* tk, Element* stack, Element* r_register, Element* r
     }
 }
 
-int main(int argc, char *argv[]) {
-    /* Arguments:
-     * argv[0] - ask
-     * argv[1] - debugger on
-     * argv[?] - stack size
-     * argv[?] - amount of registers
-     * argv[argc-1] (last) - file name
-     *
-     * example:
-     * ask -d s512 r10 file.ask
-     */
 
-    // Analise all arguments. Throw errors.
-    debug |= !strcmp(argv[1], "-d");
-    DPRINT("===== DEBUGGER ON! =====\n");
 
 /* ----------------------------------------------------------- */
 // Global elements
@@ -661,12 +638,6 @@ Element return_register;            // rr
 Element temp_value;                 // for pushing separate char/int/float to stack/register: push s 5
 /* ----------------------------------------------------------- */
 
-        line[strcspn(line, "\n")] = '\0'; // no "\n" in my lines!
-
-        // Tokenization:
-        tk = strtok(line, " ");
-        // If line is empty just skip it. Maybe TODO: skip empty (even with spaces) line before tokenization
-        if (tk == NULL) continue;
 
 void execute_instruction(Instruction *instr) {
     int ln = instr->line_number;   // use stored line number for errors & debug
@@ -731,7 +702,6 @@ void execute_instruction(Instruction *instr) {
             }
 
             copy(first_arg, second_arg);
-
             break;
         }
 
@@ -779,46 +749,38 @@ void execute_instruction(Instruction *instr) {
         }
 
         case OP_MUL: {
-            DPRINT("[%d]: MUL\n", line_number);
-
-            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
-            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+            DPRINT("MUL\n");
+            Element *first_arg = process_token(instr->tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(instr->tokens[2], stack, &return_register, registers, &temp_value);
 
             mul(first_arg, second_arg);
-
             break;
         }
 
         case OP_SUB: {
-            DPRINT("[%d]: SUB\n", line_number);
-
-            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
-            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+            DPRINT("SUB\n");
+            Element *first_arg = process_token(instr->tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(instr->tokens[2], stack, &return_register, registers, &temp_value);
 
             sub(first_arg, second_arg);
-
             break;
         }
 
         case OP_DIV: {
-            DPRINT("[%d]: DIV\n", line_number);
-
-            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
-            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+            DPRINT("DIV\n");
+            Element *first_arg = process_token(instr->tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(instr->tokens[2], stack, &return_register, registers, &temp_value);
 
             div_(first_arg, second_arg);
-
             break;
         }
 
         case OP_MOD: {
-            DPRINT("[%d]: MOD\n", line_number);
-
-            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
-            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+            DPRINT("MOD\n");
+            Element *first_arg = process_token(instr->tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(instr->tokens[2], stack, &return_register, registers, &temp_value);
 
             mod(first_arg, second_arg);
-
             break;
         }
 
@@ -882,7 +844,7 @@ void execute_instruction(Instruction *instr) {
         }
 
         default:
-            fprintf(stderr, "[Syntax error][%d]: unknown instruction: \n%s\n", line_number, line);
+            fprintf(stderr, "[Syntax error][%d]: unknown instruction: \n%s\n", ln, instr->tokens[0]);
             break;
     }
 }
