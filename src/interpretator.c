@@ -575,22 +575,22 @@ Element* process_token(char* tk, Element* stack, Element* r_register, Element* r
             exit(1);
         }
     }
-    // Check if token has double quotes (char literal)
-    else if (tk[0] == '"' && tk[strlen(tk)-1] == '"') {
-        // Remove the quotes
-        char content[strlen(tk)-1];
-        strncpy(content, tk + 1, strlen(tk) - 2);
-        content[strlen(tk)-2] = '\0';
+    // Check if token has quotes (double or single)
+    else if ((tk[0] == '"' && tk[strlen(tk)-1] == '"') ||
+             (tk[0] == '\'' && tk[strlen(tk)-1] == '\'')) {
+        char quote = tk[0];
+        int len = strlen(tk);
+        // Extract content between quotes
+        char content[len-1];   // enough space
+        strncpy(content, tk + 1, len - 2);
+        content[len-2] = '\0';
 
-        // Check if it's a single character
         if (strlen(content) == 1) {
-            //printf("[process_token]: arg = char '%c'\n", content[0]);
             temp_value->type = TYPE_CHAR;
             temp_value->value.c = content[0];
             return temp_value;
         } else {
-            //printf("[process_token]: arg = string (not a single char)\n");
-            return NULL;
+            return NULL;  // multi-char string, caller should handle it
         }
     }
     // Token doesn't have double quotes = check if it's a number
