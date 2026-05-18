@@ -758,8 +758,32 @@ void execute_instruction(Instruction *instr) {
             DPRINT("PRINT: ");
             Element *first_arg = process_token(instr->tokens[1], stack, &return_register, registers, &temp_value);
 
-            if (first_arg == stack) {
-                first_arg = &stack[stack_pointer];
+            // If printing from stack and there is a third token (number N) -> print top N elements
+            if (first_arg == stack && instr->token_count == 3) {
+                // Parse N
+                int count = atoi(instr->tokens[2]);
+                if (count <= 0) {
+                    fprintf(stderr, "[Fatal Error][%d]: print count must be positive.\n", ln);
+                    exit(1);
+                }
+                if (stack_pointer - count + 1 < 0) {
+                    fprintf(stderr, "[Fatal Error][%d]: Stack underflow on print.\n", ln);
+                    exit(1);
+                }
+                DPRINT("PRINT stack top %d:\n", count);
+                // Print from top of stack downward (topmost first)
+                for (int i = 0; i < count; i++) {
+                    int idx = stack_pointer - i;
+                    prints(&stack[idx]);
+                }
+            }
+            // Regular single print (possibly from stack or register)
+            else {
+                DPRINT("PRINT: ");
+                if (first_arg == stack) {
+                    first_arg = &stack[stack_pointer];
+                }
+                prints(first_arg);
             }
 
             prints(first_arg);
