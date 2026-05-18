@@ -1,6 +1,6 @@
 /* ==== Virtual Stack Machine Interpretator (Askeza) ====
  *
- * Version: 2.0.0 "Socrates"
+ * Version: 2.1.0 "Socrates"
  * Started: 16.12.2025
  * Github (documentation and etc): https://github.com/TheItcor/Askeza
  *
@@ -714,10 +714,6 @@ void execute_instruction(Instruction *instr) {
                 }
                 DPRINT("[SP: %d -> %d]\n", old_sp, stack_pointer);
             }
-
-            push(first_arg, second_arg);
-
-            DPRINT("[SP: %d -> %d]\n", old_sp, stack_pointer);
             break;
         }
 
@@ -755,7 +751,6 @@ void execute_instruction(Instruction *instr) {
         }
 
         case OP_PRINT: {
-            DPRINT("PRINT: ");
             Element *first_arg = process_token(instr->tokens[1], stack, &return_register, registers, &temp_value);
 
             // If printing from stack and there is a third token (number N) -> print top N elements
@@ -785,8 +780,6 @@ void execute_instruction(Instruction *instr) {
                 }
                 prints(first_arg);
             }
-
-            prints(first_arg);
             break;
         }
 
