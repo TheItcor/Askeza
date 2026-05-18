@@ -110,6 +110,49 @@ typedef enum {
 } OP_CODE;
 
 
+// Call stack for subroutines
+#define CALL_STACK_SIZE 256
+int call_stack[CALL_STACK_SIZE];
+int call_sp = -1;
+
+// Label table
+typedef struct {
+    char *name;
+    int instr_index;
+} LabelEntry;
+
+LabelEntry *label_table = NULL;
+int label_count = 0;
+
+// Stored instruction
+typedef struct {
+    OP_CODE op;
+    char *tokens[8];      // copies of tokens
+    int token_count;
+    int line_number;      // for error messages
+} Instruction;
+
+Instruction *program = NULL;
+int program_size = 0;
+int current_instr = 0;    // instruction pointer
+
+
+void add_label(const char *name, int idx) {
+    label_table = realloc(label_table, (label_count + 1) * sizeof(LabelEntry));
+    label_table[label_count].name = strdup(name);
+    label_table[label_count].instr_index = idx;
+    label_count++;
+}
+
+int find_label(const char *name) {
+    for (int i = 0; i < label_count; i++) {
+        if (strcmp(label_table[i].name, name) == 0)
+            return label_table[i].instr_index;
+    }
+    return -1;
+}
+
+
 OP_CODE get_op_code(char *operation){
     if (strcmp(operation, "push") == 0) return OP_PUSH;
     if (strcmp(operation, "pop") == 0) return OP_POP;
@@ -450,17 +493,6 @@ void mod(Element *first, Element *second) {
 }
 
 
-void jmp() {}
-
-
-void if_() {}
-
-
-void ret() {}
-
-
-void end() {}
-
 
 
 // Funcs for errors (throwErrors.c in future):
@@ -641,30 +673,22 @@ void execute_instruction(Instruction *instr) {
     line_number = ln;              // update global so error functions know the right line
     DPRINT("[%d]: ", ln);
 
-        while ((tk = strtok(NULL, " ")) != NULL && tk_count < 8) {
-            tokens[tk_count++] = tk;
-        }
+    switch (instr->op) {
 
-        // Tokens print test
-        //for (int i = 0; i < tk_count; i++) {
-        //    printf("token %d: %s\n", i, tokens[i]);
-        //}
-
-        OP_CODE operation = get_op_code(tokens[0]);
-
-        switch (operation)
-        {
         case OP_PUSH: {
-            DPRINT("[%d]: PUSH %s <- %s  |  ", line_number, tokens[1], tokens[2]);
+            DPRINT("PUSH %s <- %s  |  ", instr->tokens[1], instr->tokens[2]);
+            int old_sp = stack_pointer;   // remember stack pointer before changes
             // Reading arguments & get address of them
-            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
-            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+            Element *first_arg = process_token(instr->tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(instr->tokens[2], stack, &return_register, registers, &temp_value);
 
+            // If destination is stack -> push a new element on top
             if (first_arg == stack) {
                 is_overflow();
                 stack_pointer++;
                 first_arg = &stack[stack_pointer];
             }
+            // If source is stack -> take value from top and then pop it
             if (second_arg == stack) {
                 is_underflow();
                 second_arg = &stack[stack_pointer];
@@ -673,31 +697,32 @@ void execute_instruction(Instruction *instr) {
 
             push(first_arg, second_arg);
 
-            DPRINT("[SP: %d -> %d]\n", stack_pointer, stack_pointer+1);
+            DPRINT("[SP: %d -> %d]\n", old_sp, stack_pointer);
             break;
         }
 
         case OP_POP: {
-            DPRINT("[%d]: POP  |  ", line_number);
+            DPRINT("POP  |  ");
+            int old_sp = stack_pointer;
             pop(&stack[stack_pointer]);
 
-            DPRINT("[SP: %d -> %d]\n", stack_pointer, stack_pointer-1);
+            DPRINT("[SP: %d -> %d]\n", old_sp, stack_pointer);
             break;
         }
 
         case OP_SWAP: {
-            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
-            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+            DPRINT("SWAP\n");
+            Element *first_arg = process_token(instr->tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(instr->tokens[2], stack, &return_register, registers, &temp_value);
 
             swap(first_arg, second_arg);
-
             break;
         }
 
         case OP_COPY: {
-            DPRINT("[%d]: COPY\n", line_number);
-            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
-            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+            DPRINT("COPY\n");
+            Element *first_arg = process_token(instr->tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(instr->tokens[2], stack, &return_register, registers, &temp_value);
 
             if (first_arg == stack) {
                 is_overflow();
@@ -711,8 +736,8 @@ void execute_instruction(Instruction *instr) {
         }
 
         case OP_PRINT: {
-            DPRINT("[%d]: PRINT: ", line_number);
-            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
+            DPRINT("PRINT: ");
+            Element *first_arg = process_token(instr->tokens[1], stack, &return_register, registers, &temp_value);
 
             if (first_arg == stack) {
                 first_arg = &stack[stack_pointer];
@@ -723,10 +748,10 @@ void execute_instruction(Instruction *instr) {
         }
 
         case OP_INPUT: {
-            DPRINT("[%d]: INPUT %s <- ", line_number, tokens[2]);
+            DPRINT("INPUT %s <- ", instr->tokens[2]);
 
             //Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
-            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(instr->tokens[2], stack, &return_register, registers, &temp_value);
 
             if (second_arg == stack) {
                 is_overflow();
@@ -734,24 +759,22 @@ void execute_instruction(Instruction *instr) {
                 second_arg = &stack[stack_pointer];
             }
 
-            //send only the first char of the type: float -> f, int -> i, char -> c
-            inputs(tokens[1][0], second_arg);
+            // send only the first char of the type: float -> f, int -> i, char -> c
+            inputs(instr->tokens[1][0], second_arg);
             break;
         }
 
         case OP_GETLINES: {
-            DPRINT("[%d]: GETLINES\n", line_number);
+            DPRINT("GETLINES\n");
             break;
         }
 
         case OP_ADD: {
-            DPRINT("[%d]: ADD\n", line_number);
-
-            Element *first_arg = process_token(tokens[1], stack, &return_register, registers, &temp_value);
-            Element *second_arg = process_token(tokens[2], stack, &return_register, registers, &temp_value);
+            DPRINT("ADD\n");
+            Element *first_arg = process_token(instr->tokens[1], stack, &return_register, registers, &temp_value);
+            Element *second_arg = process_token(instr->tokens[2], stack, &return_register, registers, &temp_value);
 
             add(first_arg, second_arg);
-
             break;
         }
 
@@ -800,29 +823,61 @@ void execute_instruction(Instruction *instr) {
         }
 
         case OP_JMP: {
-            DPRINT("[%d]: JPM\n", line_number);
+            DPRINT("JMP %s\n", instr->tokens[1]);
+            // Look up label in table
+            int target = find_label(instr->tokens[1]);
+            if (target == -1) {
+                fprintf(stderr, "[Fatal Error][%d]: Label '%s' not found.\n", ln, instr->tokens[1]);
+                exit(1);
+            }
+            // Jump directly to the instruction index (loop will advance to it)
+            current_instr = target;
             break;
         }
 
-        case OP_IF: {
-            DPRINT("[%d]: IF\n", line_number);
+        case OP_CALL: {
+            DPRINT("CALL %s\n", instr->tokens[1]);
+            int target = find_label(instr->tokens[1]);
+            if (target == -1) {
+                fprintf(stderr, "[Fatal Error][%d]: Label '%s' not found.\n", ln, instr->tokens[1]);
+                exit(1);
+            }
+            if (call_sp >= CALL_STACK_SIZE - 1) {
+                fprintf(stderr, "[Fatal Error][%d]: Call stack overflow.\n", ln);
+                exit(1);
+            }
+            // Save return address (next instruction after this call)
+            call_stack[++call_sp] = current_instr + 1;
+            current_instr = target;
             break;
         }
 
         case OP_RET: {
-            DPRINT("[%d]: RET\n", line_number);
+            DPRINT("RET\n");
+            if (call_sp < 0) {
+                fprintf(stderr, "[Fatal Error][%d]: Return without call.\n", ln);
+                exit(1);
+            }
+            // Pop return address and continue execution
+            current_instr = call_stack[call_sp--] - 1; // -1 because the main loop will increment current_instr after
+            break;
+        }
+
+        case OP_IF: {
+            DPRINT("IF (not implemented yet)\n");
             break;
         }
 
         case OP_END: {
-            DPRINT("[%d]: END\n", line_number);
-            //printf("[Debugger]: %d. END\n", line_number);
-            goto end;
+            DPRINT("END\n");
+            // Force exit from the execution loop by moving past the program
+            current_instr = program_size;
+            break;
         }
 
         case OP_LABEL: {
-            DPRINT("[%d]: LABEL\n", line_number);
-            //printf("[Debugger]: %d. LABEL!\n", line_number);
+            DPRINT("LABEL\n");
+            // Labels do nothing at runtime – they are just markers
             break;
         }
 
