@@ -950,9 +950,9 @@ int main(int argc, char *argv[]) {
         if (instr->op != OP_LABEL) {         // labels do nothing at runtime
             execute_instruction(instr);
         }
+        current_instr++;
     }
 
-    end:
 
     if (flag_main == 0) fprintf(stderr, "[Fatal Error]: Label main not found.");
 
