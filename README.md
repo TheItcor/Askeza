@@ -125,6 +125,9 @@ During the interpreter's operation, an error may be detected:
 | `[Fatal Error][line]: Failed to read integer`                      | A non-integer was entered when input. |
 | `[Fatal Error][line]: Failed to read float`                        | A non-float was entered when input. |
 | `[Fatal Error][line]: Failed to read char`                         | A non-char was entered when input. |
+| `[Fatal Error][line]: Label '(...)' not found.`                     | The label specified in the jmp or call does not exist. |
+| `[Fatal Error][line]: Call stack overflow.`                         | There are too many nested calls (256 limit exceeded).   |
+| `[Fatal Error][line]: Return without call.`                         | A ret instruction was encountered when the call stack was empty (there were no calls). |
 
 
 ---

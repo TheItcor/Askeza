@@ -125,6 +125,9 @@ Registers:
 | `[Fatal Error][line]: Failed to read integer`                      | Некорректное целое число при вводе. |
 | `[Fatal Error][line]: Failed to read float`                        | Некорректное число с плавающей точкой при вводе.   |
 | `[Fatal Error][line]: Failed to read char`                         | Некорректный символ (буква) при вводе. |
+| `[Fatal Error][line]: Label '(...)' not found.`                     | Метка, указанная в jmp или call, не существует. |
+| `[Fatal Error][line]: Call stack overflow.`                         | Слишком много вложенных вызовов (превышен лимит 256).   |
+| `[Fatal Error][line]: Return without call.`                         | Встречена инструкция ret, когда стек вызовов пуст (не было ни одного call). |
 
 ---
 
