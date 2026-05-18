@@ -271,10 +271,10 @@ main:
 
 ```
 print_two:
-  // using r0, rr   //  uses r0, rr in the label
-	add r0 2
-	push rr, r0 // move the value from r0 to rr
-	ret
+    // using r0, rr   <-  warning about using r0, rr in the label
+    add r0 2
+    push rr, r0     // move the value from r0 to rr
+    ret
 
 
 main:
@@ -325,10 +325,10 @@ square:
     ret rr
 
 main:
-	push r0 2
-	jmp square
-	print r0
-	end 0
+	  push r0 2
+	  jmp square
+	  print r0
+	  end 0
 ```
 
 File main.ask

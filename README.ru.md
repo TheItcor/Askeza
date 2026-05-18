@@ -268,10 +268,10 @@ main:
 
 ```
 print_two:
-    // using r0, rr  // Предупреждаем о работе r0, rr в метке
-	add r0 2
-	push rr, r0 // перемещаем значение из r0 в rr 
-	ret         // возвращаемся
+    // using r0, rr  <- Предупреждаем о работе r0, rr в метке
+	  add r0 2
+	  push rr, r0 // перемещаем значение из r0 в rr 
+	  ret         // возвращаемся
 
 
 main:
@@ -323,10 +323,10 @@ square:
     ret rr
 
 main:
-	push r0 2
-	jmp squre
-	print r0
-	end 0
+	  push r0 2
+	  jmp squre
+	  print r0
+	  end 0
 ```
 
 файл main.ask
@@ -366,7 +366,7 @@ main:
 * между метками (в том числе main) должен быть 1 отступ
 ```
 main:
-	if (r0 != 0); jmp then;
+	  if (r0 != 0); jmp then;
 
 then:
     jmp print_cool
