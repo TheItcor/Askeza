@@ -220,10 +220,42 @@ We push 5 characters onto the stack and then print the last 5 elements from the 
 
 
 
-## Labels
+## Labels, jmp, call, ret
 
-There is no conventional concept of a function as found in high-level languages. Instead, the language uses labels, returns, and jumps.
-To declare a label, write `label_name:` before `main`. Example:
+There is no conventional understanding of functions as in high-level languages. Instead, there are labels, returns, and jumps. 
+To declare a label, you need to write `label_name:`. Example:
+
+Jumping to a label (infinite loop):
+
+```
+loop:    
+    push r0 1
+    add r0 r0
+    print r0
+    jmp loop       // return to the loop label
+```
+
+
+Calling a subroutine. It works like jmp, but before the jump, it stores the address of the next instruction in a special call stack.
+When the ret instruction is executed inside the subroutine, control will return to the instruction immediately after the call.
+
+```
+double:
+    mul r0 2
+    push rr r0     // save the result in the return register
+    ret            // return to the call point
+
+main:    
+    push r0 5
+    call double    // jump to double, storing the return point
+    print rr       // prints 10
+    end 0
+```
+
+
+
+
+Other examples:
 
 ```
 print_hello:
