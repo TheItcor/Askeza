@@ -961,23 +961,25 @@ int main(int argc, char *argv[]) {
     {
         DPRINT("========================\n");
         DPRINT("\nStack: \n");
-        int count = 1;
-        for (int i = 0; i < (int)(STACK_SIZE); i++) {
-            if (stack[i].value.i == 0 && stack[i].type == TYPE_VOID) {
-                break;
+        for (int i = 0; i <= stack_pointer; i++) {
+            DPRINT("[%d] ", i);
+            switch (stack[i].type) {
+                case TYPE_INT:   DPRINT("%d (INT)\n", stack[i].value.i); break;
+                case TYPE_FLOAT: DPRINT("%f (FLOAT)\n", stack[i].value.f); break;
+                case TYPE_CHAR:  DPRINT("'%c' (CHAR)\n", stack[i].value.c); break;
+                default:         DPRINT("void\n");
             }
-
-            DPRINT("[%d][%d, %s]   ", i, stack[i].value.i, type_name(stack[i].type));
-            if (count % 6 == 0) { printf("\n"); }
-            count++;
         }
-        printf("\n\n");
-
-        DPRINT("Registers: \n");
+        printf("\nRegisters:\n");
         for (int i = 0; i < REGISTER_NUMBER; i++) {
-            printf("[r%d][%d, %s]\n", i, registers[i].value.i, type_name(stack[i].type));
+            printf("[r%d] ", i);
+            switch (registers[i].type) {
+                case TYPE_INT:   printf("%d (INT)\n", registers[i].value.i); break;
+                case TYPE_FLOAT: printf("%f (FLOAT)\n", registers[i].value.f); break;
+                case TYPE_CHAR:  printf("'%c' (CHAR)\n", registers[i].value.c); break;
+                default:         printf("void\n");
+            }
         }
-        printf("\n");
         printf("[Stack Pointer -> %d]\n", stack_pointer);
     }
     return 0;
