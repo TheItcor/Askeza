@@ -829,6 +829,126 @@ void execute_instruction(Instruction *instr) {
         default:
             fprintf(stderr, "[Syntax error][%d]: unknown instruction: \n%s\n", line_number, line);
             break;
+    }
+}
+
+
+int main(int argc, char *argv[]) {
+    /* Arguments:
+     * argv[0] - ask
+     * argv[1] - debugger on
+     * argv[?] - stack size
+     * argv[?] - amount of registers
+     * argv[argc-1] (last) - file name
+     *
+     * example:
+     * ask -d s512 r10 file.ask
+     */
+
+    // Analise all arguments. Throw errors.
+    debug |= !strcmp(argv[1], "-d");
+    DPRINT("===== DEBUGGER ON! =====\n");
+
+    if (argc < 2)
+    {
+        fprintf(stderr, "[Read error]: Arguments needed!\n");
+        exit(1);
+    }
+
+    check_file_path(argv[argc-1]);      // is real file or no?
+    check_file_extension(argv[argc-1]); // is .ask file or no?
+
+    // Initialization of Stack & Registers
+    init(stack, STACK_SIZE);
+    init(registers, REGISTER_NUMBER);
+
+    DPRINT("Stack size: %d\n", STACK_SIZE);
+    DPRINT("Amount of registers: %d\n", REGISTER_NUMBER);
+    DPRINT("========================\n");
+
+    // Reading .ask file
+    FILE *file = fopen(argv[argc-1], "r");
+
+    char line[256];      // one line of file.ask
+    // char *tokens[8];     // array for tokens
+    // char *tk;            // token
+    // int tk_count;        // tokens count
+    line_number = 0;     // line numbers for error throws
+    // short flag_main = 0; // is "main" started?
+
+
+    // ====== First pass: collect instructions and labels ======
+    rewind(file);
+    program = NULL;
+    program_size = 0;
+    line_number = 0;
+
+    while (fgets(line, sizeof(line), file) != NULL) {
+            line_number++;
+            strip_comment(line);
+            line[strcspn(line, "\n")] = '\0';   // no "\n" in my lines!
+            if (strlen(line) == 0) continue;    // skip empty lines
+
+            // Tokenization:
+            char *tokens[8];
+            int tk_count = 0;
+            char *tk = strtok(line, " ");
+            if (tk == NULL) continue;
+
+            tokens[tk_count++] = tk;
+            while ((tk = strtok(NULL, " ")) != NULL && tk_count < 8) {
+                tokens[tk_count++] = tk;
+            }
+
+            // Tokens print test (you can keep it if you want)
+            // for (int i = 0; i < tk_count; i++) {
+            //     printf("token %d: %s\n", i, tokens[i]);
+            // }
+
+            OP_CODE operation = get_op_code(tokens[0]);
+            if (operation == OP_UNKNOW) {
+                fprintf(stderr, "[Syntax Error][%d]: Unknown instruction '%s'.\n", line_number, tokens[0]);
+                fclose(file);
+                exit(1);
+            }
+
+            // Store instruction in program array
+            program = realloc(program, (program_size + 1) * sizeof(Instruction));
+            Instruction *instr = &program[program_size];
+            instr->op = operation;
+            instr->token_count = tk_count;
+            instr->line_number = line_number;
+            for (int i = 0; i < tk_count; i++) {
+                instr->tokens[i] = strdup(tokens[i]);
+            }
+
+            // If it's a label, add it to the label table
+            if (operation == OP_LABEL) {
+                // Token looks like "label_name:" -> remove the ':'
+                char *label_name = strdup(tokens[0]);
+                label_name[strlen(label_name) - 1] = '\0';
+                add_label(label_name, program_size);
+                free(label_name);
+            }
+
+            program_size++;
+        }
+        fclose(file);
+
+    // Check that main label exists
+    int main_idx = find_label("main");
+    if (main_idx == -1) {
+        fprintf(stderr, "[Fatal Error]: Label main not found.\n");
+        exit(1);
+    }
+
+
+    // ====== Second pass: execution ======
+    current_instr = main_idx;
+    while (current_instr < program_size) {
+        Instruction *instr = &program[current_instr];
+        if (instr->op != OP_LABEL) {         // labels do nothing at runtime
+            execute_instruction(instr);
         }
     }
 
