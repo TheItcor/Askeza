@@ -560,20 +560,20 @@ Element* process_token(char* tk, Element* stack, Element* r_register, Element* r
     // Check for registers (r0, r1, r2, ...)
     else if (tk[0] == 'r' && strlen(tk) > 1) {
         // Extract and validate register number
-        char *num_part = tk + 1;
-        while (*num_part) {
-            if (!isdigit(*num_part)) break;
-            num_part++;
+        for (size_t i = 1; tk[i] != 0; i++) {
+            if (!isdigit(tk[i])) {
+                fprintf(stderr, "[Syntax Error][%d]: Non-existent register.\n", line_number);
+                exit(1);
+            }
         }
 
-        if (*num_part == '\0') {
-            int reg_index = atoi(tk + 1);
-            //printf("[process_token]: arg = r%d\n", reg_index);
-            return &registers[reg_index];
-        } else {
+        int reg_index = atoi(tk + 1);
+        if (reg_index >= REGISTER_NUMBER) {
             fprintf(stderr, "[Syntax Error][%d]: Non-existent register.\n", line_number);
             exit(1);
         }
+
+        return registers + reg_index;
     }
     // Check if token has quotes (double or single)
     else if ((tk[0] == '"' && tk[strlen(tk)-1] == '"') ||
